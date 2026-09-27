@@ -447,8 +447,8 @@
         let appData = {
             rain24h: 12.0,
             stations: [
-                { id: 'M177', name: 'บ้านลาดบัวขาว ต.ลาดบัวขาว อ.สีคิ้ว', level: 180.20, bank: 182.00, flow: 12.50 },
-                { id: 'M192', name: 'บ้านโนนค่า ต.บุ่งขี้เหล็ก อ.สูงเนิน', level: 162.40, bank: 164.50, flow: 18.20 },
+                { id: 'M177', name: 'บ้านลาดบัวขาว ต.ลาดบัวขาว อ.สีคิ้ว', level: 241.10, bank: 243.30, flow: 12.50 },
+                { id: 'M192', name: 'บ้านโนนค่า ต.บุ่งขี้เหล็ก อ.สูงเนิน', level: 201.80, bank: 203.90, flow: 18.20 },
                 { id: 'M191', name: 'บ้านโคกกรวด ต.โคกกรวด อ.เมืองนครราชสีมา', level: 150.10, bank: 195.30, flow: 15.80 },
                 { id: 'M164', name: 'ตำบลในเมือง อ.เมืองนครราชสีมา', level: 142.30, bank: 177.60, flow: 22.10 }
             ],
@@ -803,37 +803,61 @@
         function initChart() {
             const ctx = document.getElementById('waterLevelChart').getContext('2d');
             chartInstance = new Chart(ctx, {
-                type: 'bar',
+                type: 'line',
                 data: {
                     labels: appData.stations.map(s => `${s.id} (${s.name.split(' ')[0]})`),
                     datasets: [
                         {
                             label: 'ระดับน้ำปัจจุบัน (ม.รทก.)',
                             data: appData.stations.map(s => s.level),
-                            backgroundColor: 'rgba(30, 136, 229, 0.85)',
                             borderColor: '#1e88e5',
-                            borderWidth: 1,
-                            borderRadius: 6
+                            backgroundColor: 'rgba(30, 136, 229, 0.15)',
+                            borderWidth: 3,
+                            pointBackgroundColor: '#0d47a1',
+                            pointBorderColor: '#ffffff',
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            tension: 0.3,
+                            fill: true
                         },
                         {
                             label: 'ระดับตลิ่ง (ม.รทก.)',
                             data: appData.stations.map(s => s.bank),
-                            backgroundColor: 'rgba(239, 68, 68, 0.35)',
                             borderColor: '#ef4444',
-                            borderWidth: 1.5,
-                            borderDash: [4, 4],
-                            borderRadius: 6
+                            backgroundColor: 'transparent',
+                            borderWidth: 2.5,
+                            borderDash: [6, 6],
+                            pointBackgroundColor: '#dc2626',
+                            pointBorderColor: '#ffffff',
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            tension: 0.1
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
                     plugins: {
-                        legend: { position: 'top' }
+                        legend: { position: 'top' },
+                        tooltip: {
+                            padding: 10,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(2)} ม.รทก.`;
+                                }
+                            }
+                        }
                     },
                     scales: {
-                        y: { beginAtZero: false, title: { display: true, text: 'ระดับน้ำ (ม.รทก.)' } }
+                        y: { 
+                            beginAtZero: false, 
+                            title: { display: true, text: 'ระดับน้ำ (ม.รทก.)' } 
+                        }
                     }
                 }
             });
