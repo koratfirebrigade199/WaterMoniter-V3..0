@@ -102,11 +102,8 @@
                     <div class="flex flex-wrap justify-between items-center gap-2 mb-2">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-500 bg-slate-200 px-2.5 py-1 rounded-md">สถานะภาพรวมน้ำท่วม</span>
                         
-                        <!-- Data Mode & Timestamp Indicator -->
+                        <!-- Timestamp Indicator (Auto Live Sync badge removed) -->
                         <div class="flex items-center gap-2">
-                            <span id="dataModeBadge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
-                                <i class="fa-solid fa-arrows-rotate animate-spin text-[10px]"></i> โหมดข้อมูล: ดึงข้อมูลอัตโนมัติ (Auto Live Sync)
-                            </span>
                             <span id="lastUpdatedTime" class="text-xs text-slate-500"><i class="fa-regular fa-clock me-1"></i>อัปเดตล่าสุด: --</span>
                         </div>
                     </div>
@@ -228,7 +225,7 @@
                     </ul>
                 </div>
 
-                <!-- Road Surfaces Impacted -->
+                <!-- Road Surfaces Impacted (Updated Road Name) -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 transition md:col-span-2 lg:col-span-1" id="zoneRoads">
                     <h4 class="font-bold text-slate-700 text-xs mb-2 flex items-center gap-1.5 border-b pb-1.5">
                         <i class="fa-solid fa-road text-amber-600"></i> ผิวจราจรที่ได้รับผลกระทบ
@@ -240,6 +237,7 @@
                         <li>ตรอกเสาธง (ตลาดย่าโม)</li>
                         <li>ถ.ราชดำเนิน (แยก IT)</li>
                         <li>เบญจรงค์ ซ.8</li>
+                        <li>ถ.จอมสุรางค์ยาตร์</li>
                     </ul>
                 </div>
             </div>
@@ -301,7 +299,7 @@
                     <!-- Static Dam Illustration & Water Reservoir Diagram -->
                     <div class="dam-graphic-container h-44 rounded-2xl relative mb-4 shadow-md border border-slate-300 overflow-hidden flex items-end">
                         
-                        <!-- Water Body Reservoir (Static height based on %) -->
+                        <!-- Water Body Reservoir -->
                         <div id="staticWaterFill" class="water-fill absolute bottom-0 left-0 w-3/5 rounded-tr-lg border-r border-t border-sky-300" style="height: 60%;">
                             <div class="p-2 text-white text-xs font-semibold drop-shadow">
                                 <span class="bg-blue-900/60 px-2 py-0.5 rounded text-[10px]">อ่างเก็บน้ำ</span>
@@ -336,11 +334,12 @@
             </div>
         </div>
 
-        <!-- SECTION 3: 6 Rules Conditional Flood Criteria Analysis -->
+        <!-- SECTION 3: Flood Criteria Warning Rules Analysis -->
         <section class="glass-card rounded-2xl p-6 shadow-sm border border-slate-200">
+            <!-- Updated Section Title (Removed (สถานี M.191 & M.164)) -->
             <h2 class="text-base sm:text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
                 <i class="fa-solid fa-list-check text-blue-600"></i>
-                การประมวลผลการแจ้งเตือนภัยน้ำท่วมพื้นที่ชุมชน (สถานี M.191 & M.164)
+                การประมวลผลตามเงื่อนไขเฝ้าระวังภัยน้ำท่วมพื้นที่ชุมชน
             </h2>
             <p class="text-xs text-slate-500 mb-4">ระบบประมวลผลแสดงข้อมูลเฉพาะเงื่อนไขและชุมชนที่เข้าเกณฑ์การเฝ้าระวังหรือเตือนภัยในปัจจุบัน</p>
 
@@ -355,7 +354,7 @@
     <footer class="bg-slate-800 text-slate-400 text-xs py-6 mt-8 border-t border-slate-700">
         <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
             <p class="font-medium text-slate-300">งานศูนย์ป้องกันและบรรเทาสาธารณภัย เทศบาลนครนครราชสีมา</p>
-            <p>อาคารป้องกันและบรรเทาสาธารณภัย ถนนโพธิ์กลาง ต.ในเมือง อ.เมืองนครราชสีมา จ.นครราชสีมา 30000</p>
+            <p>อาคารป้องกันและบรรเทาสาธารณภัย ถ.จอมสุรางค์ยาตร์ ต.ในเมือง อ.เมืองนครราชสีมา จ.นครราชสีมา 30000</p>
             <p class="text-slate-500">สายด่วน 199 หรือ 0-4424-2222 (ตลอด 24 ชั่วโมง)</p>
         </div>
     </footer>
@@ -551,9 +550,8 @@
 
         // Simulated Auto API Fetch (Triggered when in Auto Live Sync Mode)
         function autoSyncLiveData() {
-            if (appData.isManualOverride) return; // Prevent overwriting if manual override is active
+            if (appData.isManualOverride) return;
 
-            // Simulate slight live fluctuations
             appData.lastUpdated = new Date().toLocaleString('th-TH');
             saveDataToStorage();
         }
@@ -569,16 +567,6 @@
 
         // Main Rendering Orchestration
         function renderAllViews() {
-            // Render Mode Badge Flag
-            const modeBadge = document.getElementById('dataModeBadge');
-            if (appData.isManualOverride) {
-                modeBadge.className = "text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1 shadow-sm";
-                modeBadge.innerHTML = `<i class="fa-solid fa-user-pen text-[10px]"></i> โหมดข้อมูล: บันทึกโดยเจ้าหน้าที่ (Manual Override)`;
-            } else {
-                modeBadge.className = "text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 shadow-sm";
-                modeBadge.innerHTML = `<i class="fa-solid fa-arrows-rotate animate-spin text-[10px]"></i> โหมดข้อมูล: ดึงข้อมูลอัตโนมัติ (Auto Live Sync)`;
-            }
-
             document.getElementById('lastUpdatedTime').innerHTML = `<i class="fa-regular fa-clock me-1"></i>อัปเดตล่าสุด: ${appData.lastUpdated}`;
             
             // Render Rainfall Display
