@@ -4,1230 +4,964 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบติดตามระดับน้ำและแจ้งเตือนภัยน้ำท่วม - เทศบาลนครนครราชสีมา</title>
-    
-    <!-- Tailwind CSS CDN -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- FontAwesome CDN -->
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Chart.js CDN -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Google Fonts Prompt & Sarabun -->
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <!-- Google Fonts Prompt -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Prompt', 'Sarabun', 'sans-serif'],
-                    },
                     colors: {
                         korat: {
-                            blue: '#0d47a1',
-                            lightBlue: '#1e88e5',
-                            darkBlue: '#002171',
-                            accent: '#00b0ff',
+                            50: '#eef6ff',
+                            100: '#e0edff',
+                            500: '#1d4ed8',
+                            600: '#1e40af',
+                            700: '#1d3557',
+                            800: '#0f172a',
                         }
+                    },
+                    fontFamily: {
+                        prompt: ['Prompt', 'sans-serif']
                     }
                 }
             }
         }
     </script>
+
     <style>
-        body { font-family: 'Prompt', 'Sarabun', sans-serif; background-color: #f8fafc; }
-        .glass-header { background: rgba(13, 71, 161, 0.96); backdrop-filter: blur(12px); }
-        .pulse-red { animation: pulseRed 2s infinite; }
-        @keyframes pulseRed {
-            0%, 100% { background-color: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.8); }
-            50% { background-color: rgba(239, 68, 68, 0.3); border-color: rgba(220, 38, 38, 1); }
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #f1f5f9;
         }
-        
-        /* Water Wave Animation Effect for Reservoir Graphic */
-        .wave-box {
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+        }
+
+        /* Static Dam Graphic Styles */
+        .dam-graphic-container {
             position: relative;
-            overflow: hidden;
+            background: linear-gradient(to bottom, #e0f2fe 0%, #bae6fd 60%, #cbd5e1 60%, #94a3b8 100%);
         }
-        .wave {
-            position: absolute;
-            left: 0;
-            width: 200%;
-            height: 100%;
-            background: rgba(14, 165, 233, 0.35);
-            border-radius: 40%;
-            animation: wave 10s linear infinite;
-            bottom: -80%;
-            transition: bottom 0.8s ease-in-out;
+        .dam-body {
+            clip-path: polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%);
+            background: linear-gradient(135deg, #64748b 0%, #334155 100%);
         }
-        .wave:nth-child(2) {
-            animation: wave 14s linear infinite;
-            background: rgba(3, 105, 161, 0.5);
-            opacity: 0.8;
-            bottom: -83%;
-        }
-        @keyframes wave {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .water-fill {
+            background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+            transition: height 0.5s ease-in-out;
         }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen flex flex-col text-slate-800 text-xs sm:text-sm md:text-base">
+<body class="text-slate-800 antialiased bg-slate-100 flex flex-col min-h-screen">
 
-    <header class="glass-header text-white sticky top-0 z-50 shadow-md">
-        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-3">
-                <!-- Branding -->
-                <div class="flex items-center space-x-3 text-center md:text-left">
-                    <div class="bg-white p-2 rounded-xl shadow-inner flex-shrink-0">
-                        <i class="fa-solid fa-house-tsunami text-korat-blue text-2xl sm:text-3xl md:text-4xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-sm sm:text-base md:text-xl lg:text-2xl font-bold leading-tight">ระบบติดตามระดับน้ำและแจ้งเตือนภัยน้ำท่วม</h1>
-                        <p class="text-[11px] sm:text-xs md:text-sm text-blue-100">งานศูนย์ป้องกันและบรรเทาสาธารณภัย เทศบาลนครนครราชสีมา</p>
-                    </div>
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-800 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white p-2 rounded-full shadow-md">
+                    <i class="fa-solid fa-water text-blue-600 text-2xl"></i>
                 </div>
-
-                <!-- Emergency Contacts & Officer Login Button -->
-                <div class="flex items-center space-x-2.5 w-full md:w-auto justify-between md:justify-end border-t border-blue-600/50 pt-2 md:pt-0 md:border-0">
-                    <a href="tel:199" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center space-x-2 shadow transition">
-                        <i class="fa-solid fa-phone-volume animate-bounce"></i>
-                        <span>โทร. 199 , 0-4424-2222</span>
-                    </a>
-
-                    <button id="adminLoginBtn" onclick="openLoginModal()" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium flex items-center space-x-1.5 transition">
-                        <i class="fa-solid fa-user-gear"></i>
-                        <span id="adminStatusText">เข้าสู่ระบบเจ้าหน้าที่</span>
-                    </button>
+                <div>
+                    <h1 class="font-bold text-base sm:text-lg md:text-xl leading-tight">ระบบติดตามระดับน้ำและแจ้งเตือนภัยน้ำท่วม</h1>
+                    <p class="text-xs text-blue-200">งานศูนย์ป้องกันและบรรเทาสาธารณภัย เทศบาลนครนครราชสีมา</p>
                 </div>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <a href="tel:199" class="bg-red-600 hover:bg-red-700 text-white text-xs md:text-sm font-semibold px-3 py-2 rounded-xl shadow transition flex items-center gap-1.5 animate-pulse">
+                    <i class="fa-solid fa-phone-volume"></i> สายด่วน 199
+                </a>
+                <a href="tel:044242222" class="bg-blue-600 hover:bg-blue-700 text-white text-xs md:text-sm font-semibold px-3 py-2 rounded-xl shadow transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-headset"></i> 0-4424-2222
+                </a>
+                <button onclick="openAdminModal()" class="bg-slate-700 hover:bg-slate-800 text-white text-xs md:text-sm px-3 py-2 rounded-xl transition">
+                    <i class="fa-solid fa-user-lock"></i> <span class="hidden sm:inline">เจ้าหน้าที่</span>
+                </button>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 flex-grow w-full space-y-4 sm:space-y-6">
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
 
-        <!-- Overall Status Banner -->
-        <div id="overallStatusBanner" class="bg-white rounded-2xl p-3.5 sm:p-5 shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 transition-all duration-300">
-            <div class="flex items-center space-x-3 sm:space-x-4">
-                <div id="overallStatusIcon" class="p-3 sm:p-3.5 bg-emerald-100 text-emerald-700 rounded-2xl text-2xl sm:text-3xl shrink-0">
-                    <i class="fa-solid fa-shield-check"></i>
-                </div>
+        <!-- Top Banner & Weather Panel -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Alert Status Banner -->
+            <div class="lg:col-span-2 glass-card rounded-2xl p-5 shadow-sm border-l-8 border-blue-600 flex flex-col justify-between" id="mainStatusCard">
                 <div>
-                    <div class="flex items-center space-x-2 flex-wrap gap-y-1">
-                        <h2 class="text-sm sm:text-base md:text-lg font-bold text-slate-800">สถานะการเฝ้าระวังภัยน้ำท่วมภาพรวม</h2>
-                        <span id="overallBadge" class="text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">ปกติ</span>
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 bg-slate-200 px-2.5 py-1 rounded-md">สถานะภาพรวมน้ำท่วม</span>
+                        <span id="lastUpdatedTime" class="text-xs text-slate-500"><i class="fa-regular fa-clock me-1"></i>อัปเดตล่าสุด: --</span>
                     </div>
-                    <p id="overallStatusText" class="text-xs sm:text-sm md:text-base text-slate-600 mt-1">สถานการณ์ปกติ ระดับน้ำสถานี M191 และ M164 ต่ำกว่าตลิ่งมากกว่า 15 ซม. ทุกชุมชนอยู่ในสภาวะปกติ</p>
+                    <h2 id="overallAlertTitle" class="text-xl md:text-2xl font-bold mt-2 text-slate-800">กำลังประมวลผลข้อมูล...</h2>
+                    <p id="overallAlertDesc" class="text-xs sm:text-sm text-slate-600 mt-1">ระบบกำลังทำการวิเคราะห์ข้อมูลปริมาณน้ำฝนและระดับน้ำในลำน้ำ...</p>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-200 flex flex-wrap gap-2 text-xs font-medium" id="quickBadgeContainer">
+                    <!-- Badges injected dynamically -->
                 </div>
             </div>
-            <div class="text-right shrink-0 hidden md:block border-l pl-4 border-slate-100">
-                <span class="text-[11px] sm:text-xs text-slate-400 block">เวลาอัปเดตล่าสุด</span>
-                <span id="lastUpdateTimestamp" class="text-xs sm:text-sm font-semibold text-slate-700">--:-- น.</span>
+
+            <!-- Weather Card -->
+            <div class="glass-card rounded-2xl p-5 shadow-sm flex flex-col justify-between bg-gradient-to-br from-sky-50 to-blue-50 border border-sky-100">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-slate-700 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-cloud-sun-rain text-amber-500 text-lg"></i> พยากรณ์อากาศ อ.เมืองนครราชสีมา
+                    </h3>
+                    <span class="text-[10px] bg-sky-200 text-sky-800 font-semibold px-2 py-0.5 rounded">Live Weather</span>
+                </div>
+                <div class="py-3 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <i id="weatherIcon" class="fa-solid fa-sun text-4xl text-amber-500"></i>
+                        <div>
+                            <div class="text-2xl font-bold text-slate-800" id="weatherTemp">-- °C</div>
+                            <div class="text-xs text-slate-500" id="weatherCondition">กำลังดึงข้อมูล...</div>
+                        </div>
+                    </div>
+                    <div class="text-right text-xs text-slate-600 space-y-1">
+                        <div>ความชื้น: <span id="weatherHumidity" class="font-semibold">--%</span></div>
+                        <div>ความเร็วลม: <span id="weatherWind" class="font-semibold">-- km/h</span></div>
+                    </div>
+                </div>
+                <div class="text-[11px] text-slate-400 text-right">ข้อมูลอุตุนิยมวิทยา Open-Meteo</div>
             </div>
         </div>
 
-        <!-- Automated Flood Analysis & Community Alert Section -->
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="bg-slate-900 text-white px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-                <div class="flex items-center space-x-2 sm:space-x-3">
-                    <i class="fa-solid fa-microchip text-amber-400 text-base sm:text-xl"></i>
-                    <h2 class="font-bold text-xs sm:text-sm md:text-base">สรุปการวิเคราะห์และแจ้งเตือนภัยรายชุมชน (Automated Analysis Engine)</h2>
-                </div>
-                <span class="text-[10px] sm:text-xs bg-white/10 px-2.5 py-1 rounded-full text-blue-200 shrink-0">
-                    <i class="fa-solid fa-bolt mr-1"></i>วิเคราะห์อัตโนมัติ
-                </span>
-            </div>
-
-            <div class="p-3.5 sm:p-5">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4" id="communityAlertGrid">
-                    <!-- Dynamic rendering by analyzeRiskConditions() JS -->
-                </div>
-            </div>
-        </section>
-
-        <!-- Weather Forecast Section -->
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="bg-gradient-to-r from-blue-900 to-korat-blue text-white px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-                <div class="flex items-center space-x-2 sm:space-x-3">
-                    <i class="fa-solid fa-cloud-sun text-amber-300 text-base sm:text-xl"></i>
-                    <h2 class="font-bold text-xs sm:text-sm md:text-base">สรุปการพยากรณ์อากาศ อ.เมืองนครราชสีมา จ.นครราชสีมา</h2>
-                </div>
-                <div class="flex items-center space-x-2 text-[10px] sm:text-xs text-blue-100 shrink-0">
-                    <span id="weatherUpdatedTime"><i class="fa-solid fa-rotate text-[10px] animate-spin mr-1"></i>กำลังอัปเดต...</span>
-                </div>
-            </div>
-
-            <div class="p-3.5 sm:p-5">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-3.5 sm:gap-4 mb-4 sm:mb-6">
-                    <div class="md:col-span-1 bg-gradient-to-br from-blue-50 to-indigo-50 p-3.5 sm:p-4 rounded-xl border border-blue-100 flex items-center justify-between">
-                        <div>
-                            <span class="text-xs text-slate-500 font-medium block">สภาพอากาศปัจจุบัน</span>
-                            <div class="text-2xl sm:text-3xl font-extrabold text-korat-darkBlue mt-1">
-                                <span id="currentTemp">--</span>°C
-                            </div>
-                            <span id="currentCondition" class="text-xs sm:text-sm font-semibold text-korat-blue mt-0.5 block">กำลังโหลด...</span>
-                        </div>
-                        <div id="currentWeatherIcon" class="text-3xl sm:text-4xl text-amber-500">
-                            <i class="fa-solid fa-sun animate-pulse"></i>
-                        </div>
-                    </div>
-
-                    <div class="md:col-span-3 grid grid-cols-3 gap-2.5 sm:gap-3">
-                        <div class="bg-slate-50 p-2.5 sm:p-3.5 rounded-xl border border-slate-100 flex items-center space-x-2.5 sm:space-x-3">
-                            <div class="p-2 sm:p-2.5 bg-blue-100 text-korat-blue rounded-lg text-base sm:text-lg shrink-0">
-                                <i class="fa-solid fa-droplet"></i>
-                            </div>
-                            <div>
-                                <span class="text-[10px] sm:text-xs text-slate-500 block">ความชื้นสัมพัทธ์</span>
-                                <span class="text-xs sm:text-sm md:text-base font-bold text-slate-800"><span id="currentHumidity">--</span>%</span>
-                            </div>
-                        </div>
-
-                        <div class="bg-slate-50 p-2.5 sm:p-3.5 rounded-xl border border-slate-100 flex items-center space-x-2.5 sm:space-x-3">
-                            <div class="p-2 sm:p-2.5 bg-cyan-100 text-cyan-700 rounded-lg text-base sm:text-lg shrink-0">
-                                <i class="fa-solid fa-wind"></i>
-                            </div>
-                            <div>
-                                <span class="text-[10px] sm:text-xs text-slate-500 block">ความเร็วลม</span>
-                                <span class="text-xs sm:text-sm md:text-base font-bold text-slate-800"><span id="currentWindSpeed">--</span> กม./ชม.</span>
-                            </div>
-                        </div>
-
-                        <div class="bg-slate-50 p-2.5 sm:p-3.5 rounded-xl border border-slate-100 flex items-center space-x-2.5 sm:space-x-3">
-                            <div class="p-2 sm:p-2.5 bg-indigo-100 text-indigo-700 rounded-lg text-base sm:text-lg shrink-0">
-                                <i class="fa-solid fa-cloud-showers-heavy"></i>
-                            </div>
-                            <div>
-                                <span class="text-[10px] sm:text-xs text-slate-500 block">โอกาสเกิดฝนวันนี้</span>
-                                <span class="text-xs sm:text-sm md:text-base font-bold text-slate-800"><span id="currentRainProb">--</span>%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+        <!-- SECTION 1: Rainfall Risk Analysis & Affected Communities -->
+        <section class="glass-card rounded-2xl p-6 shadow-sm border border-slate-200">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 border-b pb-4">
                 <div>
-                    <h3 class="text-xs sm:text-sm font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center">
-                        <i class="fa-solid fa-calendar-week text-korat-blue mr-2"></i>
-                        พยากรณ์อากาศล่วงหน้า 5 วัน
-                    </h3>
-                    <div id="forecastContainer" class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 sm:gap-3">
-                        <div class="text-center py-6 text-xs text-slate-400 col-span-5">กำลังโหลดข้อมูลพยากรณ์อากาศ...</div>
-                    </div>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-cloud-showers-heavy text-blue-600"></i>
+                        ระบบวิเคราะห์ปริมาณน้ำฝนสะสม 24 ชม. และพื้นที่เสี่ยงภัย
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5">สถานีตรวจวัดนครราชสีมา ต.หนองไผ่ล้อม อ.เมืองนครราชสีมา</p>
+                </div>
+                <div class="flex items-center bg-blue-50 px-4 py-2 rounded-xl border border-blue-200 shadow-sm">
+                    <span class="text-xs text-slate-600 me-2.5 font-medium">ปริมาณฝนสะสม 24 ชม.:</span>
+                    <span id="rainDisplayValue" class="text-xl sm:text-2xl font-extrabold text-blue-700">0.0</span>
+                    <span class="text-xs text-slate-600 ml-1 font-semibold">มม.</span>
                 </div>
             </div>
-        </section>
 
-        <!-- Rain Station Section (Redesigned & Responsive Grid) -->
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="bg-slate-800 text-white px-4 sm:px-6 py-3 sm:py-3.5 flex items-center justify-between">
-                <div class="flex items-center space-x-2 sm:space-x-3">
-                    <div class="p-1.5 bg-blue-500/20 rounded-lg">
-                        <i class="fa-solid fa-cloud-showers-heavy text-korat-accent text-sm sm:text-base"></i>
-                    </div>
-                    <h2 class="font-bold text-xs sm:text-sm md:text-base">ข้อมูลปริมาณน้ำฝน สถานีตรวจวัดนครราชสีมา</h2>
-                </div>
-                <span class="text-[10px] sm:text-xs text-slate-300 bg-slate-700/60 px-2.5 py-1 rounded-full border border-slate-600/50">
-                    <i class="fa-solid fa-location-dot text-amber-400 mr-1"></i>ต.หนองไผ่ล้อม อ.เมืองนครราชสีมา
-                </span>
-            </div>
-            
-            <div class="p-3.5 sm:p-5">
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5 sm:gap-4 items-center">
-                    
-                    <!-- Rain Value Compact Card -->
-                    <div class="md:col-span-5 lg:col-span-4 bg-gradient-to-br from-blue-50 via-sky-50/50 to-indigo-50/40 p-4 rounded-xl border border-blue-100/80 shadow-sm flex items-center justify-between relative overflow-hidden">
-                        <div class="absolute -right-2 -bottom-2 text-blue-500/5 text-7xl pointer-events-none">
-                            <i class="fa-solid fa-cloud-showers-water"></i>
-                        </div>
-                        <div class="flex items-center space-x-3.5 z-10">
-                            <div class="p-3 bg-gradient-to-tr from-blue-600 to-sky-400 text-white rounded-2xl shadow-md text-xl sm:text-2xl shrink-0">
-                                <i class="fa-solid fa-droplet"></i>
-                            </div>
-                            <div>
-                                <div class="text-[11px] sm:text-xs text-slate-500 font-semibold uppercase tracking-wider">ปริมาณฝนสะสม 24 ชั่วโมง</div>
-                                <div class="text-2xl sm:text-3xl font-black text-korat-blue mt-0.5 tracking-tight flex items-baseline space-x-1">
-                                    <span id="rain24h">18.5</span>
-                                    <span class="text-xs sm:text-sm font-normal text-slate-600">มม.</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="z-10 text-right">
-                            <span id="rainStatus" class="inline-block text-[10px] sm:text-xs px-2.5 py-1 rounded-lg font-semibold bg-blue-100 text-blue-700 border border-blue-200/60 shadow-xs">ฝนตกเล็กน้อย</span>
-                        </div>
-                    </div>
-
-                    <!-- Evaluation Banner -->
-                    <div class="md:col-span-7 lg:col-span-8 bg-slate-50/90 p-4 rounded-xl border border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
-                        <div class="flex items-center space-x-3">
-                            <div class="p-2.5 bg-emerald-100/80 text-emerald-700 rounded-xl text-lg shrink-0 border border-emerald-200">
-                                <i class="fa-solid fa-shield-check"></i>
-                            </div>
-                            <div>
-                                <span class="text-[11px] sm:text-xs text-slate-400 font-medium block">เกณฑ์การประเมินสภาวะฝนสะสม</span>
-                                <span id="rainRiskEval" class="text-xs sm:text-sm md:text-base font-bold text-emerald-600 mt-0.5 block">สภาวะฝนสะสมอยู่ในเกณฑ์ปกติ ปลอดภัยต่อเสี่ยงน้ำท่วมฉับพลัน</span>
-                            </div>
-                        </div>
-
-                        <!-- Mini Rain Gauge Bar -->
-                        <div class="w-full sm:w-48 shrink-0 space-y-1">
-                            <div class="flex justify-between text-[10px] font-medium text-slate-500">
-                                <span>ระดับความเสี่ยง</span>
-                                <span class="font-bold text-slate-700">ต่ำ</span>
-                            </div>
-                            <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden flex">
-                                <div class="bg-blue-400 h-full w-1/3" title="ฝนตกเล็กน้อย (<35mm)"></div>
-                                <div class="bg-amber-400 h-full w-1/3" title="ฝนตกปานกลาง (35-90mm)"></div>
-                                <div class="bg-red-500 h-full w-1/3" title="ฝนตกหนัก (>90mm)"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </section>
-
-        <!-- Lam Takhong Water Level Stations Section -->
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="bg-korat-blue text-white px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-                <div class="flex items-center space-x-2 sm:space-x-3">
-                    <i class="fa-solid fa-water text-korat-accent text-base sm:text-lg"></i>
-                    <h2 class="font-bold text-xs sm:text-sm md:text-base">ข้อมูลระดับน้ำลุ่มน้ำลำตะคอง (4 สถานีตรวจวัดหลัก)</h2>
-                </div>
-                <span class="text-[10px] sm:text-xs text-blue-100">ONWR / กรมชลประทาน</span>
-            </div>
-
-            <div class="p-3.5 sm:p-5 space-y-4 sm:space-y-6">
-                <!-- Data Table -->
-                <div class="overflow-x-auto rounded-xl border border-slate-200">
-                    <table class="w-full text-xs sm:text-sm text-left text-slate-600">
-                        <thead class="text-[11px] sm:text-xs text-slate-700 uppercase bg-slate-100 border-b border-slate-200">
-                            <tr>
-                                <th scope="col" class="px-3 sm:px-4 py-2.5 sm:py-3 font-bold">รหัสสถานี</th>
-                                <th scope="col" class="px-3 sm:px-4 py-2.5 sm:py-3 font-bold">ชื่อสถานี / ที่ตั้ง</th>
-                                <th scope="col" class="px-3 sm:px-4 py-2.5 sm:py-3 text-center font-bold">ระดับน้ำปัจจุบัน<br><span class="text-[10px] font-normal lowercase">(ม.รทก.)</span></th>
-                                <th scope="col" class="px-3 sm:px-4 py-2.5 sm:py-3 text-center font-bold">ระดับตลิ่ง<br><span class="text-[10px] font-normal lowercase">(ม.รทก.)</span></th>
-                                <th scope="col" class="px-3 sm:px-4 py-2.5 sm:py-3 text-center font-bold">อัตราการไหล<br><span class="text-[10px] font-normal lowercase">(c.ms / ม.³/วินาที)</span></th>
-                                <th scope="col" class="px-3 sm:px-4 py-2.5 sm:py-3 text-center font-bold">สถานะสถานี</th>
-                            </tr>
-                        </thead>
-                        <tbody id="stationsTableBody" class="divide-y divide-slate-200">
-                            <!-- Populated dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Comparison Line Chart -->
-                <div class="bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200">
-                    <h3 class="text-xs sm:text-sm font-bold text-slate-700 mb-3 flex items-center">
-                        <i class="fa-solid fa-chart-line text-korat-blue mr-2"></i>
-                        กราฟเปรียบเทียบระดับน้ำปัจจุบันกับระดับตลิ่ง (4 สถานีตรวจวัดหลัก)
-                    </h3>
-                    <div class="relative w-full h-64 sm:h-80 md:h-96">
-                        <canvas id="waterLevelChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Lam Takhong Reservoir Data Section (Infographic Edition) -->
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-sky-950 text-white px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between">
-                <div class="flex items-center space-x-2 sm:space-x-3">
-                    <div class="p-1.5 bg-amber-500/20 rounded-lg">
-                        <i class="fa-solid fa-dam text-amber-400 text-base sm:text-lg"></i>
-                    </div>
+            <!-- Rainfall Risk Status Header -->
+            <div id="rainRiskAlertBar" class="p-4 rounded-xl border transition flex items-center justify-between bg-emerald-50 border-emerald-200">
+                <div class="flex items-center gap-3">
+                    <i id="rainRiskIcon" class="fa-solid fa-circle-check text-2xl text-emerald-500"></i>
                     <div>
-                        <h2 class="font-bold text-xs sm:text-sm md:text-base">อินโฟกราฟิกปริมาณน้ำอ่างเก็บน้ำลำตะคอง</h2>
-                        <p class="text-[10px] sm:text-xs text-slate-300">ต.คลองไผ่ อ.สีคิ้ว จ.นครราชสีมา (ความจุเก็บกักสูงสุด 314.00 ล้าน ม.³)</p>
+                        <div id="rainRiskTitle" class="font-bold text-sm text-slate-800">ปริมาณน้ำฝนอยู่ในเกณฑ์ปกติ (&lt; 30 มม.)</div>
+                        <div id="rainRiskSubtitle" class="text-xs text-slate-500">ยังไม่ถึงเกณฑ์เตือนภัยพื้นที่ชุมชนและผิวจราจร</div>
                     </div>
                 </div>
-                <span class="text-[10px] sm:text-xs bg-sky-500/20 border border-sky-400/30 text-sky-200 px-3 py-1 rounded-full shrink-0 font-medium hidden sm:inline-block">
-                    <i class="fa-solid fa-droplet text-sky-400 mr-1"></i>อัปเดตเรียลไทม์
-                </span>
             </div>
 
-            <div class="p-3.5 sm:p-6 bg-slate-50/50">
-                
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-                    
-                    <!-- Left: Interactive Water Reservoir 3D Dam Cross-Section Graphic (7 cols) -->
-                    <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm flex flex-col justify-between relative overflow-hidden">
-                        <div class="flex items-center justify-between mb-3 z-10">
-                            <div class="flex items-center space-x-2">
-                                <span class="w-3 h-3 rounded-full bg-sky-500 animate-ping"></span>
-                                <h3 class="text-xs sm:text-sm font-bold text-slate-800">ผังจำลองระดับน้ำในอ่างเก็บน้ำ (Dam Cross-Section View)</h3>
-                            </div>
-                            <span class="text-[11px] font-bold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-md border border-sky-100">
-                                ระดับน้ำคิดเป็น <span id="graphicDamPercentText" class="text-sky-900 font-extrabold text-xs sm:text-sm">45.49%</span>
-                            </span>
-                        </div>
-
-                        <!-- Dynamic Visual Dam Container -->
-                        <div class="relative w-full h-56 sm:h-64 bg-gradient-to-b from-sky-100 via-blue-50 to-slate-200 rounded-xl overflow-hidden border border-slate-300 shadow-inner flex flex-col justify-between">
-                            
-                            <!-- Dam Sky / Clouds Layer -->
-                            <div class="absolute top-2 left-3 right-3 flex justify-between items-center text-[10px] text-slate-500 font-semibold z-20 pointer-events-none">
-                                <span class="bg-white/80 backdrop-blur-xs px-2 py-0.5 rounded shadow-xs"><i class="fa-solid fa-mountain mr-1 text-slate-600"></i> สันเขื่อน (+314M m³)</span>
-                                <span class="bg-amber-100/90 text-amber-900 px-2 py-0.5 rounded shadow-xs"><i class="fa-solid fa-triangle-exclamation mr-1"></i> เกณฑ์เฝ้าระวัง 80%</span>
-                            </div>
-
-                            <!-- Dam Structure SVG Side Outline -->
-                            <div class="absolute right-0 bottom-0 top-0 w-24 sm:w-32 bg-slate-700/80 backdrop-blur-xs border-l-4 border-slate-800 z-10 flex flex-col justify-between p-2 text-white/80 text-[10px]">
-                                <div class="text-center font-bold border-b border-slate-600 pb-1 text-slate-200">
-                                    <i class="fa-solid fa-monument block text-sm mb-0.5"></i>โครงสร้างตัวเขื่อน
-                                </div>
-                                <div class="space-y-1 my-auto text-[9px] text-slate-300">
-                                    <div class="flex justify-between"><span>ทางระบาย:</span><span id="graphicDamOutflow" class="text-amber-300 font-bold">0.12</span></div>
-                                    <div class="text-[8px] text-slate-400">ล้าน ม.³/วัน</div>
-                                </div>
-                                <div class="text-[9px] text-center bg-slate-900/60 py-1 rounded border border-slate-600">
-                                    สปิลเวย์ (Spillway)
-                                </div>
-                            </div>
-
-                            <!-- Animated Liquid Water Wave Layer -->
-                            <div class="wave-box absolute inset-0 w-full h-full">
-                                <div id="waterWave1" class="wave"></div>
-                                <div id="waterWave2" class="wave"></div>
-                            </div>
-
-                            <!-- Water Surface Indicator Badge -->
-                            <div id="waterLevelBadge" class="absolute left-4 z-20 transition-all duration-700 flex items-center space-x-2" style="bottom: 40%;">
-                                <div class="bg-slate-900/90 text-sky-300 text-[11px] font-extrabold px-3 py-1 rounded-lg shadow-lg border border-sky-400/40 flex items-center space-x-1.5">
-                                    <i class="fa-solid fa-water text-xs animate-bounce"></i>
-                                    <span>ปริมาตรปัจจุบัน: <span id="graphicDamVolumeText" class="text-white text-xs sm:text-sm">142.85</span> ล้าน ม.³</span>
-                                </div>
-                            </div>
-
-                            <!-- Inflow Arrow Indicator -->
-                            <div class="absolute top-8 left-3 z-20 bg-white/90 backdrop-blur-xs p-2 rounded-lg border border-slate-200 shadow-sm flex items-center space-x-2">
-                                <div class="p-1.5 bg-emerald-100 text-emerald-700 rounded-md">
-                                    <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
-                                </div>
-                                <div>
-                                    <div class="text-[9px] text-slate-400 font-bold uppercase">น้ำไหลเข้าอ่าง (Inflow)</div>
-                                    <div class="text-xs font-black text-emerald-700"><span id="graphicDamInflow">0.42</span> <span class="text-[9px] font-normal text-slate-600">ล้าน ม.³/วัน</span></div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <!-- Legend & Capacity Meter -->
-                        <div class="mt-4 pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-600 gap-2">
-                            <div class="flex items-center space-x-4">
-                                <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-sky-500 mr-1.5"></span>น้ำในอ่าง</span>
-                                <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-slate-300 mr-1.5"></span>ความจุว่างรองรับได้อีก (<span id="graphicDamRemaining">171.15</span>M m³)</span>
-                            </div>
-                            <span class="text-[11px] font-semibold text-slate-400">ความจุออกแบบ: 314.00 ล้าน ม.³</span>
-                        </div>
-                    </div>
-
-                    <!-- Right: Circular Hydro Gauge & Metrics Grid (5 cols) -->
-                    <div class="lg:col-span-5 flex flex-col justify-between space-y-3.5 sm:space-y-4">
-                        
-                        <!-- Circular Hydro Donut Chart Card -->
-                        <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm flex items-center justify-between relative">
-                            <div class="space-y-1">
-                                <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block">สัดส่วนความจุอ่างฯ</span>
-                                <div class="text-2xl sm:text-3xl font-black text-slate-800">
-                                    <span id="gaugePercentText">45.49</span><span class="text-base font-bold text-sky-600">%</span>
-                                </div>
-                                <span id="gaugeStatusText" class="inline-block text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                                    ระดับน้ำปานกลาง (ปกติ)
-                                </span>
-                            </div>
-
-                            <!-- Circular Doughnut Canvas -->
-                            <div class="relative w-28 h-28 sm:w-32 sm:h-32 shrink-0">
-                                <canvas id="reservoirGaugeChart"></canvas>
-                                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                    <i class="fa-solid fa-faucet-drip text-sky-500 text-base mb-0.5"></i>
-                                    <span class="text-[9px] font-bold text-slate-400 uppercase">Capacity</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 4 Essential Metrics Cards Grid -->
-                        <div class="grid grid-cols-2 gap-2.5 sm:gap-3 flex-grow">
-                            
-                            <!-- Metric 1: Inflow -->
-                            <div class="bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-[10px] sm:text-xs text-slate-500 font-medium">น้ำไหลเข้าอ่าง</span>
-                                    <div class="p-1.5 bg-emerald-100 text-emerald-700 rounded-md text-xs">
-                                        <i class="fa-solid fa-arrow-down-long"></i>
-                                    </div>
-                                </div>
-                                <div class="mt-2">
-                                    <div class="text-base sm:text-lg font-black text-slate-800"><span id="metricInflow">0.42</span></div>
-                                    <div class="text-[10px] text-slate-400">ล้าน ม.³/วัน</div>
-                                </div>
-                            </div>
-
-                            <!-- Metric 2: Current Volume -->
-                            <div class="bg-gradient-to-br from-sky-500 to-korat-blue text-white p-3 sm:p-3.5 rounded-xl shadow-xs flex flex-col justify-between">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-[10px] sm:text-xs text-blue-100 font-medium">ปริมาตรน้ำปัจจุบัน</span>
-                                    <div class="p-1.5 bg-white/20 text-white rounded-md text-xs">
-                                        <i class="fa-solid fa-database"></i>
-                                    </div>
-                                </div>
-                                <div class="mt-2">
-                                    <div class="text-base sm:text-lg font-black"><span id="metricVolume">142.85</span></div>
-                                    <div class="text-[10px] text-blue-200">ล้าน ม.³</div>
-                                </div>
-                            </div>
-
-                            <!-- Metric 3: Capacity Percent -->
-                            <div class="bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-[10px] sm:text-xs text-slate-500 font-medium">ร้อยละเทียบความจุ</span>
-                                    <div class="p-1.5 bg-sky-100 text-sky-700 rounded-md text-xs">
-                                        <i class="fa-solid fa-percent"></i>
-                                    </div>
-                                </div>
-                                <div class="mt-2">
-                                    <div class="text-base sm:text-lg font-black text-sky-700"><span id="metricPercent">45.49</span>%</div>
-                                    <div class="text-[10px] text-slate-400">สูงสุด 314.00M m³</div>
-                                </div>
-                            </div>
-
-                            <!-- Metric 4: Outflow -->
-                            <div class="bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-[10px] sm:text-xs text-slate-500 font-medium">อัตราการระบายน้ำ</span>
-                                    <div class="p-1.5 bg-amber-100 text-amber-700 rounded-md text-xs">
-                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                                    </div>
-                                </div>
-                                <div class="mt-2">
-                                    <div class="text-base sm:text-lg font-black text-amber-600"><span id="metricOutflow">0.12</span></div>
-                                    <div class="text-[10px] text-slate-400">ล้าน ม.³/วัน</div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                    </div>
-
+            <!-- Conditional Zones and Impacted Roads Grid (Hidden by default when rainfall < 30mm) -->
+            <div id="rainImpactedContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-5 hidden">
+                <!-- Zone Save One -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 transition" id="zoneSaveOne">
+                    <h4 class="font-bold text-slate-700 text-xs mb-2 flex items-center gap-1.5 border-b pb-1.5">
+                        <i class="fa-solid fa-location-dot text-indigo-500"></i> Zone ตลาด Save One
+                    </h4>
+                    <ul class="text-xs text-slate-600 space-y-1 list-disc list-inside">
+                        <li>ชุมชนปริชาติ</li>
+                        <li>โคราชคฤหาสห์ทอง</li>
+                        <li>มิตรภาพ 11</li>
+                        <li>บ้านรุ่งเรือง</li>
+                    </ul>
                 </div>
 
+                <!-- Zone Nong Phai Lom -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 transition" id="zoneNongPhaiLom">
+                    <h4 class="font-bold text-slate-700 text-xs mb-2 flex items-center gap-1.5 border-b pb-1.5">
+                        <i class="fa-solid fa-location-dot text-indigo-500"></i> Zone หนองไผ่ล้อม
+                    </h4>
+                    <ul class="text-xs text-slate-600 space-y-1 list-disc list-inside">
+                        <li>พานิชเจริญ</li>
+                        <li>หนองแก้ช้าง</li>
+                        <li>เอ็มแบ็คสามัคคี</li>
+                        <li>เสาสูง</li>
+                        <li>หนองไผ่ล้อม</li>
+                        <li>หนองไผ่ล้อมพัฒนา</li>
+                        <li>โรงต้มพัฒนา</li>
+                    </ul>
+                </div>
+
+                <!-- Zone Benjarong -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 transition" id="zoneBenjarong">
+                    <h4 class="font-bold text-slate-700 text-xs mb-2 flex items-center gap-1.5 border-b pb-1.5">
+                        <i class="fa-solid fa-location-dot text-indigo-500"></i> Zone เบญจรงค์
+                    </h4>
+                    <ul class="text-xs text-slate-600 space-y-1 list-disc list-inside">
+                        <li>หัวสะพานพัฒนา</li>
+                        <li>ราชนิกูล 3</li>
+                        <li>เบญจรงค์สามัคคี</li>
+                        <li>ท้าวสุรเบญจรงค์</li>
+                    </ul>
+                </div>
+
+                <!-- Zone Techno Village -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 transition" id="zoneTechno">
+                    <h4 class="font-bold text-slate-700 text-xs mb-2 flex items-center gap-1.5 border-b pb-1.5">
+                        <i class="fa-solid fa-location-dot text-indigo-500"></i> Zone เทคโนวิลเลจ
+                    </h4>
+                    <ul class="text-xs text-slate-600 space-y-1 list-disc list-inside">
+                        <li>หลวงจิตร</li>
+                        <li>เทคโนวิลเลจ</li>
+                        <li>30 กันยา</li>
+                    </ul>
+                </div>
+
+                <!-- Road Surfaces Impacted -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 transition md:col-span-2 lg:col-span-1" id="zoneRoads">
+                    <h4 class="font-bold text-slate-700 text-xs mb-2 flex items-center gap-1.5 border-b pb-1.5">
+                        <i class="fa-solid fa-road text-amber-600"></i> ผิวจราจรที่ได้รับผลกระทบ
+                    </h4>
+                    <ul class="text-xs text-slate-600 space-y-1 list-disc list-inside font-medium">
+                        <li>ถ.มุขมนตรี (หน้าวัดหลักร้อย)</li>
+                        <li>จุดกลับรถใต้สะพานสูงสีมาธานี</li>
+                        <li>แยกวัดใหม่อัมพวัน</li>
+                        <li>ตรอกเสาธง (ตลาดย่าโม)</li>
+                        <li>ถ.ราชดำเนิน (แยก IT)</li>
+                        <li>เบญจรงค์ ซ.8</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: River Stations Line Chart & Static Dam Infographic -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Line Chart Section -->
+            <div class="lg:col-span-2 glass-card rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between">
+                <div>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                        <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-blue-600"></i>
+                            ระดับน้ำปัจจุบันเปรียบเทียบระดับตลิ่ง (4 สถานีหลัก)
+                        </h2>
+                        <span class="text-xs text-slate-500">หน่วย: เมตร ระดับน้ำทะเลปานกลาง (ม.รทก.)</span>
+                    </div>
+
+                    <!-- Line Chart Canvas -->
+                    <div class="relative w-full h-64 md:h-72">
+                        <canvas id="waterLineChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Station Cards Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-slate-100">
+                    <div class="bg-slate-50 p-2.5 rounded-xl border text-center">
+                        <div class="text-[11px] font-bold text-slate-500">M.177 ลาดบัวขาว</div>
+                        <div id="stM177Val" class="text-base font-extrabold text-blue-700 my-0.5">0.00</div>
+                        <div class="text-[10px] text-slate-400">ตลิ่ง: 243.30 ม.</div>
+                    </div>
+                    <div class="bg-slate-50 p-2.5 rounded-xl border text-center">
+                        <div class="text-[11px] font-bold text-slate-500">M.192 โนนค่า</div>
+                        <div id="stM192Val" class="text-base font-extrabold text-blue-700 my-0.5">0.00</div>
+                        <div class="text-[10px] text-slate-400">ตลิ่ง: 203.90 ม.</div>
+                    </div>
+                    <div class="bg-slate-50 p-2.5 rounded-xl border text-center">
+                        <div class="text-[11px] font-bold text-slate-500">M.191 โคกกรวด</div>
+                        <div id="stM191Val" class="text-base font-extrabold text-blue-700 my-0.5">0.00</div>
+                        <div class="text-[10px] text-slate-400">ตลิ่ง: 195.30 ม.</div>
+                    </div>
+                    <div class="bg-slate-50 p-2.5 rounded-xl border text-center">
+                        <div class="text-[11px] font-bold text-slate-500">M.164 ต.ในเมือง</div>
+                        <div id="stM164Val" class="text-base font-extrabold text-blue-700 my-0.5">0.00</div>
+                        <div class="text-[10px] text-slate-400">ตลิ่ง: 177.60 ม.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Static Lamtakhong Dam Infographic Card -->
+            <div class="glass-card rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between relative overflow-hidden">
+                <div>
+                    <h3 class="text-base font-bold text-slate-800 flex items-center gap-2 mb-1">
+                        <i class="fa-solid fa-water-ladders text-teal-600"></i> อ่างเก็บน้ำลำตะคอง
+                    </h3>
+                    <p class="text-xs text-slate-500 mb-3">ต.คลองไผ่ อ.สีคิ้ว (ความจุเก็บกักปกติ 314.49 ล้าน ม.³)</p>
+
+                    <!-- Static Dam Illustration & Water Reservoir Diagram -->
+                    <div class="dam-graphic-container h-44 rounded-2xl relative mb-4 shadow-md border border-slate-300 overflow-hidden flex items-end">
+                        
+                        <!-- Water Body Reservoir (Static height based on %) -->
+                        <div id="staticWaterFill" class="water-fill absolute bottom-0 left-0 w-3/5 rounded-tr-lg border-r border-t border-sky-300" style="height: 60%;">
+                            <div class="p-2 text-white text-xs font-semibold drop-shadow">
+                                <span class="bg-blue-900/60 px-2 py-0.5 rounded text-[10px]">อ่างเก็บน้ำ</span>
+                            </div>
+                        </div>
+
+                        <!-- Static Embankment Dam Structure (เขื่อนดิน) -->
+                        <div class="dam-body absolute right-0 bottom-0 w-2/5 h-full z-10 flex flex-col items-center justify-center text-white text-center p-2 shadow-xl">
+                            <i class="fa-solid fa-mountain-sun text-slate-300 text-lg mb-1"></i>
+                            <span class="text-[11px] font-bold tracking-wide">สันเขื่อนลำตะคอง</span>
+                            <span class="text-[9px] text-slate-300">เขื่อนดิน (Earth Dam)</span>
+                        </div>
+
+                        <!-- Overlay Capacity Badge -->
+                        <div class="absolute top-2 left-2 z-20 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-xl shadow-sm border border-slate-200">
+                            <div class="text-[10px] font-bold text-slate-500">ปริมาตรน้ำเก็บกัก</div>
+                            <div id="damPercentText" class="text-lg font-extrabold text-blue-700">0%</div>
+                        </div>
+                    </div>
+
+                    <!-- Donut Gauge Chart -->
+                    <div class="relative w-full h-24 flex justify-center items-center">
+                        <canvas id="damGaugeChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1.5 mt-2">
+                    <div class="flex justify-between"><span>ปริมาณน้ำปัจจุบัน:</span> <span id="damCurrentVol" class="font-bold text-slate-800">0.00 ล้าน ม.³</span></div>
+                    <div class="flex justify-between"><span>อัตราน้ำไหลเข้า:</span> <span id="damInflow" class="font-bold text-emerald-600">0.00 ม.³/วิ</span></div>
+                    <div class="flex justify-between"><span>อัตราการระบายน้ำ:</span> <span id="damOutflow" class="font-bold text-blue-600">0.00 ม.³/วิ</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: 6 Rules Conditional Flood Criteria Analysis -->
+        <section class="glass-card rounded-2xl p-6 shadow-sm border border-slate-200">
+            <h2 class="text-base sm:text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-list-check text-blue-600"></i>
+                การประมวลผลการแจ้งเตือนภัยน้ำท่วมพื้นที่ชุมชน (สถานี M.191 & M.164)
+            </h2>
+            <p class="text-xs text-slate-500 mb-4">ระบบประมวลผลแสดงข้อมูลเฉพาะเงื่อนไขและชุมชนที่เข้าเกณฑ์การเฝ้าระวังหรือเตือนภัยในปัจจุบัน</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="rulesContainer">
+                <!-- Dynamically populated ONLY when active warning conditions exist -->
             </div>
         </section>
 
     </main>
 
     <!-- Footer -->
-    <footer class="bg-slate-900 text-slate-400 text-xs sm:text-sm py-6 border-t border-slate-800">
+    <footer class="bg-slate-800 text-slate-400 text-xs py-6 mt-8 border-t border-slate-700">
         <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
             <p class="font-medium text-slate-300">งานศูนย์ป้องกันและบรรเทาสาธารณภัย เทศบาลนครนครราชสีมา</p>
-            <p>สายด่วนรับแจ้งเหตุเพลิงไหม้และสาธารณภัย โทร. 199 หรือ 0-4424-2222 ตลอด 24 ชั่วโมง</p>
-            <p class="text-slate-500 pt-2 text-[11px]">© เทศบาลนครนครราชสีมา - ระบบติดตามระดับน้ำและแจ้งเตือนภัยน้ำท่วม</p>
+            <p>อาคารป้องกันและบรรเทาสาธารณภัย ถนนโพธิ์กลาง ต.ในเมือง อ.เมืองนครราชสีมา จ.นครราชสีมา 30000</p>
+            <p class="text-slate-500">สายด่วน 199 หรือ 0-4424-2222 (ตลอด 24 ชั่วโมง)</p>
         </div>
     </footer>
 
-    <!-- Modal: Admin Login -->
-    <div id="loginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-100 relative">
-            <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
-            <div class="text-center mb-5 sm:mb-6">
-                <div class="w-12 h-12 bg-blue-100 text-korat-blue rounded-full flex items-center justify-center mx-auto mb-2 text-xl">
-                    <i class="fa-solid fa-user-shield"></i>
-                </div>
-                <h3 class="text-base sm:text-lg font-bold text-slate-800">เข้าสู่ระบบเจ้าหน้าที่ ปภ.</h3>
-                <p class="text-xs text-slate-500">สำหรับเจ้าหน้าที่ผู้ได้รับอนุญาตในการจัดการข้อมูลระดับน้ำ</p>
-            </div>
-
-            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อผู้ใช้งาน (Username)</label>
-                    <input type="text" id="username" required placeholder="กรอกชื่อผู้ใช้งาน" class="w-full px-3 py-2 text-xs sm:text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-korat-blue focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">รหัสผ่าน (Password)</label>
-                    <input type="password" id="password" required placeholder="••••••••" class="w-full px-3 py-2 text-xs sm:text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-korat-blue focus:outline-none">
-                </div>
-                <div id="loginError" class="text-xs text-red-500 hidden text-center font-medium">ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง โปรดตรวจสอบอีกครั้ง</div>
-                <button type="submit" class="w-full bg-korat-blue hover:bg-blue-800 text-white font-medium py-2.5 rounded-lg text-xs sm:text-sm transition shadow">
-                    เข้าสู่ระบบ
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal: Admin Data Control Center -->
-    <div id="editModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
-        <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-slate-100 my-8">
-            <div class="flex justify-between items-center border-b pb-3 mb-4">
-                <h3 class="text-sm sm:text-base font-bold text-slate-800 flex items-center">
-                    <i class="fa-solid fa-sliders text-korat-blue mr-2"></i>
-                    จัดการข้อมูลและทดสอบสภาวะน้ำท่วม (Admin Console)
-                </h3>
-                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
-
-            <form onsubmit="saveData(event)" class="space-y-4 sm:space-y-5">
-                <!-- Preset Simulation Test Shortcuts -->
-                <div class="bg-blue-50/70 p-3 sm:p-3.5 rounded-xl border border-blue-200">
-                    <span class="text-xs font-bold text-korat-blue block mb-2"><i class="fa-solid fa-vial mr-1"></i>ทางลัดทดสอบตามเงื่อนไขทั้ง 6 ข้อ:</span>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        <button type="button" onclick="setRulePreset(6)" class="bg-white hover:bg-emerald-50 border border-emerald-300 text-emerald-800 px-2 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium text-left shadow-sm">ข้อ 6: ปกติ (เขียว)</button>
-                        <button type="button" onclick="setRulePreset(1)" class="bg-white hover:bg-amber-50 border border-amber-300 text-amber-800 px-2 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium text-left shadow-sm">ข้อ 1: M191 เฝ้าระวัง (เหลือง)</button>
-                        <button type="button" onclick="setRulePreset(2)" class="bg-white hover:bg-orange-50 border border-orange-300 text-orange-800 px-2 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium text-left shadow-sm">ข้อ 2: M191 ล้นตลิ่ง (ส้ม)</button>
-                        <button type="button" onclick="setRulePreset(3)" class="bg-white hover:bg-red-50 border border-red-300 text-red-800 px-2 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium text-left shadow-sm">ข้อ 3: M164 อพยพ 177m (แดง)</button>
-                        <button type="button" onclick="setRulePreset(4)" class="bg-white hover:bg-orange-50 border border-orange-400 text-orange-900 px-2 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium text-left shadow-sm">ข้อ 4: M164 ล้น10-20cm (ส้ม)</button>
-                        <button type="button" onclick="setRulePreset(5)" class="bg-white hover:bg-red-100 border border-red-500 text-red-900 px-2 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium text-left shadow-sm">ข้อ 5: M164 วิกฤต 20-30cm</button>
-                    </div>
-                </div>
-
-                <!-- Rain Data Edit -->
-                <div class="bg-slate-50 p-3 sm:p-3.5 rounded-xl border border-slate-200">
-                    <h4 class="text-xs font-bold text-slate-700 uppercase mb-2">1. ข้อมูลน้ำฝน สถานีหนองไผ่ล้อม</h4>
-                    <div>
-                        <label class="block text-xs text-slate-600 mb-1">ปริมาณฝนสะสม 24 ชม. (มม.)</label>
-                        <input type="number" step="0.1" id="editRain24h" class="w-full px-3 py-1.5 text-xs sm:text-sm border rounded-lg focus:ring-1 focus:ring-blue-500">
-                    </div>
-                </div>
-
-                <!-- Stations Data Edit -->
-                <div class="bg-slate-50 p-3 sm:p-3.5 rounded-xl border border-slate-200">
-                    <h4 class="text-xs font-bold text-slate-700 uppercase mb-2">2. ปรับระดับน้ำสถานี (M191 ตลิ่ง 195.30 / M164 ตลิ่ง 177.60 / M192 ตลิ่ง 203.90 / M177 ตลิ่ง 243.30)</h4>
-                    <div id="editStationsContainer" class="space-y-2.5">
-                        <!-- Dynamic station inputs -->
-                    </div>
-                </div>
-
-                <!-- Dam Data Edit -->
-                <div class="bg-slate-50 p-3 sm:p-3.5 rounded-xl border border-slate-200">
-                    <h4 class="text-xs font-bold text-slate-700 uppercase mb-2">3. ข้อมูลอ่างเก็บน้ำลำตะคอง</h4>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
-                        <div>
-                            <label class="block text-xs text-slate-600 mb-1">น้ำไหลเข้า (ล้าน ม.³/วัน)</label>
-                            <input type="number" step="0.01" id="editDamInflow" class="w-full px-3 py-1.5 text-xs sm:text-sm border rounded-lg">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-600 mb-1">ปริมาตรน้ำปัจจุบัน (ล้าน ม.³)</label>
-                            <input type="number" step="0.01" id="editDamVolume" class="w-full px-3 py-1.5 text-xs sm:text-sm border rounded-lg">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-600 mb-1">อัตราการระบาย (ล้าน ม.³/วัน)</label>
-                            <input type="number" step="0.01" id="editDamOutflow" class="w-full px-3 py-1.5 text-xs sm:text-sm border rounded-lg">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex justify-end space-x-3 pt-2">
-                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">ยกเลิก</button>
-                    <button type="submit" class="px-5 py-2 text-xs font-medium text-white bg-korat-blue hover:bg-blue-800 rounded-lg shadow">บันทึกและประมวลผล</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        let appData = {
-            rain24h: 18.5,
-            stations: [
-                { id: 'M177', name: 'บ้านลาดบัวขาว ต.ลาดบัวขาว อ.สีคิ้ว', level: 241.10, bank: 243.30, flow: 12.50 },
-                { id: 'M192', name: 'บ้านโนนค่า ต.บุ่งขี้เหล็ก อ.สูงเนิน', level: 201.80, bank: 203.90, flow: 18.20 },
-                { id: 'M191', name: 'บ้านโคกกรวด ต.โคกกรวด อ.เมืองนครราชสีมา', level: 150.10, bank: 195.30, flow: 15.80 },
-                { id: 'M164', name: 'ตำบลในเมือง อ.เมืองนครราชสีมา', level: 142.30, bank: 177.60, flow: 22.10 }
-            ],
-            dam: {
-                inflow: 0.42,
-                volume: 142.85,
-                maxCapacity: 314.00,
-                outflow: 0.12
-            }
-        };
-
-        const GROUP_M191_PRIMARY = [
-            "มิตรภาพ ซ. 4 /คุ้มวงษ์",
-            "ตะคลองเก่า",
-            "สำโรงจันทร์",
-            "บุมะค่า",
-            "ท่าตะโกพัฒนา"
-        ];
-
-        const GROUP_M191_SECONDARY = [
-            "อรุณสามัคคีโชคดี",
-            "VIP",
-            "หลังโรงพยาบาลเซนต์แมรี่",
-            "โพธิ์ทอง",
-            "เกษตรสามัคคี 1 - 2"
-        ];
-
-        const GROUP_M164_ORANGE = [
-            "สวนหม่อน",
-            "หลังวัดสามัคคี",
-            "อบอุ่นพัฒนา",
-            "วัดศาลาลอย",
-            "มหาชัย-อุดมพร",
-            "30 กันยา",
-            "ปลายนาสามัคคี",
-            "เทคโนวิลเลจ"
-        ];
-
-        let isLoggedIn = false;
-        let chartInstance = null;
-        let reservoirGaugeChart = null;
-
-        window.onload = function() {
-            renderData();
-            initChart();
-            initReservoirGaugeChart();
-            fetchWeatherForecast();
-            updateTimestamp();
-        };
-
-        function updateTimestamp() {
-            const now = new Date();
-            document.getElementById('lastUpdateTimestamp').innerText = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} น.`;
-        }
-
-        function analyzeRiskConditions() {
-            const m191 = appData.stations.find(s => s.id === 'M191');
-            const m164 = appData.stations.find(s => s.id === 'M164');
-
-            const lvl191 = m191 ? m191.level : 0;
-            const lvl164 = m164 ? m164.level : 0;
-
-            let redCommunities = [];
-            let orangeCommunities = [];
-            let yellowCommunities = [];
-
-            let overallStatus = 'normal';
-            let statusMessage = '';
-
-            // Condition 5: M164 >= 177.80
-            if (lvl164 >= 177.80) {
-                overallStatus = 'red';
-                redCommunities.push("ทุกชุมชนตามแนวลุ่มน้ำลำตะคองเขตเทศบาลนครนครราชสีมา");
-                statusMessage = "ระดับน้ำสถานี M164 ล้นตลิ่งสูงกว่า 20-30 ซม. (วิกฤต) ขอให้ทุกชุมชนตามแนวลุ่มน้ำลำตะคองเตรียมพร้อมอพยพทันที!";
-            }
-            // Condition 3: M164 >= 177.00
-            else if (lvl164 >= 177.00 && lvl164 < 177.70) {
-                overallStatus = 'red';
-                redCommunities.push(...GROUP_M191_PRIMARY);
-                statusMessage = "ระดับน้ำสถานี M164 ถึงเกณฑ์ 177.00 ม.รทก. ชุมชนเสี่ยงภัยหลักต้องเตรียมพร้อมอพยพ!";
-            }
-
-            // Condition 4: M164 ล้นตลิ่ง 10-20 ซม. (177.70 - 177.80)
-            if (lvl164 >= 177.70 && lvl164 < 177.80) {
-                if (overallStatus !== 'red') overallStatus = 'orange';
-                orangeCommunities.push(...GROUP_M164_ORANGE);
-                if (!statusMessage) statusMessage = "ระดับน้ำสถานี M164 ล้นตลิ่ง 10-20 ซม. แจ้งเตือนภัยระดับสีส้มในชุมชนกลุ่มเสี่ยง";
-            }
-
-            // Condition 2: M191 ล้นตลิ่ง 10-20 ซม. (195.40 - 195.50)
-            if (lvl191 >= 195.40 && lvl191 <= 195.50) {
-                if (overallStatus !== 'red') overallStatus = 'orange';
-                orangeCommunities.push(...GROUP_M191_PRIMARY);
-                yellowCommunities.push(...GROUP_M191_SECONDARY);
-                if (!statusMessage) statusMessage = "ระดับน้ำสถานี M191 ล้นตลิ่ง 10-20 ซม. แจ้งเตือนภัยสีส้มและเฝ้าระวังสีเหลือง";
-            }
-            // Condition 1: M191 >= 195.00
-            else if (lvl191 >= 195.00 && lvl191 < 195.40) {
-                if (overallStatus === 'normal') overallStatus = 'yellow';
-                yellowCommunities.push(...GROUP_M191_PRIMARY);
-                if (!statusMessage) statusMessage = "ระดับน้ำสถานี M191 ถึงเกณฑ์เฝ้าระวัง 195.00 ม.รทก. ขอให้ชุมชนเตรียมพร้อมรับมือ";
-            }
-
-            // Condition 6: M191 < 195.15 และ M164 < 177.45
-            if (lvl191 < 195.15 && lvl164 < 177.45) {
-                overallStatus = 'normal';
-                redCommunities = [];
-                orangeCommunities = [];
-                yellowCommunities = [];
-                statusMessage = "สถานการณ์ปกติ ระดับน้ำสถานี M191 และ M164 ต่ำกว่าตลิ่งมากกว่า 15 ซม. ทุกชุมชนอยู่ในสภาวะปกติ";
-            }
-
-            redCommunities = [...new Set(redCommunities)];
-            orangeCommunities = [...new Set(orangeCommunities)].filter(c => !redCommunities.includes(c));
-            yellowCommunities = [...new Set(yellowCommunities)].filter(c => !redCommunities.includes(c) && !orangeCommunities.includes(c));
-
-            const banner = document.getElementById('overallStatusBanner');
-            const icon = document.getElementById('overallStatusIcon');
-            const badge = document.getElementById('overallBadge');
-            const statusText = document.getElementById('overallStatusText');
-
-            banner.className = "bg-white rounded-2xl p-3.5 sm:p-5 shadow-sm border flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 transition-all duration-300";
-
-            if (overallStatus === 'red') {
-                banner.classList.add('pulse-red');
-                icon.className = "p-3 sm:p-3.5 bg-red-100 text-red-600 rounded-2xl text-2xl sm:text-3xl shrink-0";
-                icon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
-                badge.className = "text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-red-100 text-red-800 animate-pulse";
-                badge.innerText = "วิกฤต - อพยพ (สีแดง)";
-            } else if (overallStatus === 'orange') {
-                banner.classList.add('border-orange-300', 'bg-orange-50/40');
-                icon.className = "p-3 sm:p-3.5 bg-orange-100 text-orange-600 rounded-2xl text-2xl sm:text-3xl shrink-0";
-                icon.innerHTML = '<i class="fa-solid fa-bell"></i>';
-                badge.className = "text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800";
-                badge.innerText = "เตือนภัย (สีส้ม)";
-            } else if (overallStatus === 'yellow') {
-                banner.classList.add('border-amber-300', 'bg-amber-50/40');
-                icon.className = "p-3 sm:p-3.5 bg-amber-100 text-amber-600 rounded-2xl text-2xl sm:text-3xl shrink-0";
-                icon.innerHTML = '<i class="fa-solid fa-eye"></i>';
-                badge.className = "text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800";
-                badge.innerText = "เฝ้าระวัง (สีเหลือง)";
-            } else {
-                banner.classList.add('border-slate-200');
-                icon.className = "p-3 sm:p-3.5 bg-emerald-100 text-emerald-700 rounded-2xl text-2xl sm:text-3xl shrink-0";
-                icon.innerHTML = '<i class="fa-solid fa-shield-check"></i>';
-                badge.className = "text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
-                badge.innerText = "สถานการณ์ปกติ (สีเขียว)";
-            }
-
-            statusText.innerText = statusMessage;
-
-            const grid = document.getElementById('communityAlertGrid');
-            grid.innerHTML = '';
-
-            grid.appendChild(createCommunityCard('ชุมชนต้องอพยพ (สีแดง)', redCommunities, 'red'));
-            grid.appendChild(createCommunityCard('ชุมชนเตือนภัยน้ำท่วม (สีส้ม)', orangeCommunities, 'orange'));
-            grid.appendChild(createCommunityCard('ชุมชนเฝ้าระวัง (สีเหลือง)', yellowCommunities, 'yellow'));
-        }
-
-        function createCommunityCard(title, communities, type) {
-            const card = document.createElement('div');
-            let theme = {
-                red: { border: 'border-red-200', bg: 'bg-red-50/50', headerBg: 'bg-red-600', text: 'text-red-700', icon: 'fa-triangle-exclamation' },
-                orange: { border: 'border-orange-200', bg: 'bg-orange-50/50', headerBg: 'bg-orange-500', text: 'text-orange-700', icon: 'fa-bell' },
-                yellow: { border: 'border-amber-200', bg: 'bg-amber-50/50', headerBg: 'bg-amber-500', text: 'text-amber-700', icon: 'fa-eye' }
-            }[type];
-
-            card.className = `rounded-xl border ${theme.border} ${theme.bg} overflow-hidden flex flex-col justify-between shadow-sm`;
-
-            let bodyContent = '';
-            if (communities.length === 0) {
-                bodyContent = `<div class="p-4 text-center text-xs text-slate-400 italic">ไม่มีชุมชนเข้าเกณฑ์${title.split(' ')[0]}</div>`;
-            } else {
-                bodyContent = `
-                    <ul class="p-3 sm:p-3.5 space-y-1.5 sm:space-y-2 text-xs text-slate-700">
-                        ${communities.map(c => `
-                            <li class="flex items-start space-x-2">
-                                <i class="fa-solid fa-location-dot mt-0.5 ${theme.text}"></i>
-                                <span class="font-medium">${c}</span>
-                            </li>
-                        `).join('')}
-                    </ul>
-                `;
-            }
-
-            card.innerHTML = `
-                <div>
-                    <div class="${theme.headerBg} text-white px-3 sm:px-3.5 py-2 flex items-center justify-between">
-                        <span class="text-xs font-bold flex items-center">
-                            <i class="fa-solid ${theme.icon} mr-1.5"></i> ${title}
-                        </span>
-                        <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-semibold">${communities.length} ชุมชน</span>
-                    </div>
-                    ${bodyContent}
-                </div>
-            `;
-            return card;
-        }
-
-        function renderData() {
-            // Rain Station Data Rendering
-            document.getElementById('rain24h').innerText = appData.rain24h.toFixed(1);
-            const rainStatusEl = document.getElementById('rainStatus');
-            const rainRiskEl = document.getElementById('rainRiskEval');
-
-            if (appData.rain24h === 0) {
-                rainStatusEl.innerText = 'ไม่มีฝนตก';
-                rainStatusEl.className = 'inline-block text-[10px] sm:text-xs px-2.5 py-1 rounded-lg font-semibold bg-slate-100 text-slate-700 border border-slate-200/60 shadow-xs';
-                rainRiskEl.innerText = 'สภาวะฝนสะสมอยู่ในเกณฑ์ปกติ ปลอดภัยต่อเสี่ยงน้ำท่วมฉับพลัน';
-                rainRiskEl.className = 'text-xs sm:text-sm md:text-base font-bold text-emerald-600 mt-0.5 block';
-            } else if (appData.rain24h < 35.0) {
-                rainStatusEl.innerText = 'ฝนตกเล็กน้อย';
-                rainStatusEl.className = 'inline-block text-[10px] sm:text-xs px-2.5 py-1 rounded-lg font-semibold bg-blue-100 text-blue-700 border border-blue-200/60 shadow-xs';
-                rainRiskEl.innerText = 'ปริมาณฝนอยู่ในระดับปลอดภัยต่อทางระบายน้ำ';
-                rainRiskEl.className = 'text-xs sm:text-sm md:text-base font-bold text-emerald-600 mt-0.5 block';
-            } else if (appData.rain24h < 90.0) {
-                rainStatusEl.innerText = 'ฝนตกปานกลาง';
-                rainStatusEl.className = 'inline-block text-[10px] sm:text-xs px-2.5 py-1 rounded-lg font-semibold bg-amber-100 text-amber-800 border border-amber-200/60 shadow-xs';
-                rainRiskEl.innerText = 'ควรเฝ้าระวังฝนสะสมหนาแน่นในพื้นที่ลุ่มต่ำ';
-                rainRiskEl.className = 'text-xs sm:text-sm md:text-base font-bold text-amber-600 mt-0.5 block';
-            } else {
-                rainStatusEl.innerText = 'ฝนตกหนักมาก';
-                rainStatusEl.className = 'inline-block text-[10px] sm:text-xs px-2.5 py-1 rounded-lg font-semibold bg-red-100 text-red-800 border border-red-200/60 shadow-xs';
-                rainRiskEl.innerText = 'แจ้งเตือนฝนตกหนัก มีความเสี่ยงน้ำท่วมขังเร่งระบาย!';
-                rainRiskEl.className = 'text-xs sm:text-sm md:text-base font-bold text-red-600 mt-0.5 block';
-            }
-
-            // Stations Data Table
-            const tbody = document.getElementById('stationsTableBody');
-            tbody.innerHTML = '';
-            appData.stations.forEach(st => {
-                const diff = st.bank - st.level;
-                let statusBadge = '';
-                if (diff <= 0) {
-                    statusBadge = '<span class="px-2 py-0.5 text-[11px] font-semibold bg-red-100 text-red-700 rounded-full">ล้นตลิ่ง</span>';
-                } else if (diff <= 0.5) {
-                    statusBadge = '<span class="px-2 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-800 rounded-full">เฝ้าระวัง</span>';
-                } else {
-                    statusBadge = '<span class="px-2 py-0.5 text-[11px] font-semibold bg-emerald-100 text-emerald-700 rounded-full">ปกติ</span>';
-                }
-
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 transition';
-                tr.innerHTML = `
-                    <td class="px-3 sm:px-4 py-2.5 sm:py-3 font-bold text-korat-blue">${st.id}</td>
-                    <td class="px-3 sm:px-4 py-2.5 sm:py-3 font-medium text-slate-800">${st.name}</td>
-                    <td class="px-3 sm:px-4 py-2.5 sm:py-3 text-center font-bold ${diff <= 0.5 ? 'text-red-600' : 'text-slate-700'}">${st.level.toFixed(2)}</td>
-                    <td class="px-3 sm:px-4 py-2.5 sm:py-3 text-center text-slate-500">${st.bank.toFixed(2)}</td>
-                    <td class="px-3 sm:px-4 py-2.5 sm:py-3 text-center text-slate-700 font-medium">${st.flow.toFixed(2)}</td>
-                    <td class="px-3 sm:px-4 py-2.5 sm:py-3 text-center">${statusBadge}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            // Reservoir Data Update (Metrics & Infographic Dynamic Water Level)
-            const percent = (appData.dam.volume / appData.dam.maxCapacity) * 100;
-            const remainingVol = Math.max(0, appData.dam.maxCapacity - appData.dam.volume);
-
-            document.getElementById('metricInflow').innerText = appData.dam.inflow.toFixed(2);
-            document.getElementById('metricVolume').innerText = appData.dam.volume.toFixed(2);
-            document.getElementById('metricPercent').innerText = percent.toFixed(2);
-            document.getElementById('metricOutflow').innerText = appData.dam.outflow.toFixed(2);
-
-            document.getElementById('graphicDamInflow').innerText = appData.dam.inflow.toFixed(2);
-            document.getElementById('graphicDamOutflow').innerText = appData.dam.outflow.toFixed(2);
-            document.getElementById('graphicDamVolumeText').innerText = appData.dam.volume.toFixed(2);
-            document.getElementById('graphicDamPercentText').innerText = `${percent.toFixed(2)}%`;
-            document.getElementById('graphicDamRemaining').innerText = remainingVol.toFixed(2);
+    <!-- Admin Login / Edit Modal -->
+    <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 max-h-[92vh] overflow-y-auto">
             
-            document.getElementById('gaugePercentText').innerText = percent.toFixed(2);
+            <!-- Auth Form -->
+            <div id="adminAuthSection">
+                <div class="flex justify-between items-center mb-4 border-b pb-3">
+                    <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-user-shield text-blue-600"></i> เข้าสู่ระบบเจ้าหน้าที่ ปภ.
+                    </h3>
+                    <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+                <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อผู้ใช้งาน</label>
+                        <input type="text" id="adminUser" placeholder="กรอกชื่อผู้ใช้งาน" required class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">รหัสผ่าน</label>
+                        <input type="password" id="adminPass" placeholder="••••••••" required class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div id="authError" class="text-xs text-red-600 hidden font-medium">ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง</div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition text-sm">
+                        เข้าสู่ระบบ
+                    </button>
+                </form>
+            </div>
 
-            const gaugeStatusEl = document.getElementById('gaugeStatusText');
-            if (percent >= 80) {
-                gaugeStatusEl.className = 'inline-block text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded bg-red-100 text-red-800';
-                gaugeStatusEl.innerText = 'ระดับน้ำสูงมาก (เฝ้าระวัง)';
-            } else if (percent >= 50) {
-                gaugeStatusEl.className = 'inline-block text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded bg-sky-100 text-sky-800';
-                gaugeStatusEl.innerText = 'ระดับน้ำปานกลาง (เกณฑ์ดี)';
+            <!-- Management Panel Form -->
+            <div id="adminControlSection" class="hidden">
+                <div class="flex justify-between items-center mb-4 border-b pb-3">
+                    <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-blue-600"></i> ปรับปรุงแก้ไขข้อมูลน้ำ (Admin Panel)
+                    </h3>
+                    <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+
+                <form onsubmit="saveAdminData(event)" class="space-y-4">
+                    <!-- Rain Input -->
+                    <div class="bg-blue-50/80 p-3.5 rounded-xl border border-blue-200">
+                        <label class="block text-xs font-bold text-blue-950 mb-1">ปริมาณน้ำฝนสะสม 24 ชม. (มม.)</label>
+                        <input type="number" step="0.1" id="inputRainfall" required class="w-full px-3 py-2 border rounded-lg text-sm bg-white font-bold text-blue-900">
+                        <p class="text-[11px] text-blue-700 mt-1">*ปรับแก้เพื่อทดสอบระบบวิเคราะห์ความเสี่ยงปริมาณฝนและพื้นที่เสี่ยงภัย</p>
+                    </div>
+
+                    <!-- River Stations Inputs -->
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-slate-800 border-b pb-1">ระดับน้ำสถานีต่างๆ (ม.รทก.)</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600">M.177 (ตลิ่ง 243.30)</label>
+                                <input type="number" step="0.01" id="inputM177" required class="w-full px-3 py-1.5 border rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600">M.192 (ตลิ่ง 203.90)</label>
+                                <input type="number" step="0.01" id="inputM192" required class="w-full px-3 py-1.5 border rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600">M.191 (ตลิ่ง 195.30)</label>
+                                <input type="number" step="0.01" id="inputM191" required class="w-full px-3 py-1.5 border rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600">M.164 (ตลิ่ง 177.60)</label>
+                                <input type="number" step="0.01" id="inputM164" required class="w-full px-3 py-1.5 border rounded-lg text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reservoir Inputs -->
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-slate-800 border-b pb-1">อ่างเก็บน้ำลำตะคอง</h4>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600">ปริมาณน้ำ (ล้าน ม.³)</label>
+                                <input type="number" step="0.01" id="inputDamVol" required class="w-full px-2.5 py-1.5 border rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600">น้ำไหลเข้า (ม.³/วิ)</label>
+                                <input type="number" step="0.01" id="inputDamInflow" required class="w-full px-2.5 py-1.5 border rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600">การระบาย (ม.³/วิ)</label>
+                                <input type="number" step="0.01" id="inputDamOutflow" required class="w-full px-2.5 py-1.5 border rounded-lg text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t flex gap-2">
+                        <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition text-sm flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-floppy-disk"></i> บันทึกการปรับปรุงข้อมูล
+                        </button>
+                        <button type="button" onclick="resetDefaultData()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-3 py-2.5 rounded-xl transition text-xs">
+                            รีเซ็ตเป็นค่าเริ่มต้นระบบ
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // System Constants
+        const DAM_CAPACITY = 314.49; // ล้าน ม.³
+        const STATIONS = {
+            M177: { name: 'M.177 บ้านลาดบัวขาว', bank: 243.30 },
+            M192: { name: 'M.192 บ้านโนนค่า', bank: 203.90 },
+            M191: { name: 'M.191 บ้านโคกกรวด', bank: 195.30 },
+            M164: { name: 'M.164 ตำบลในเมือง', bank: 177.60 }
+        };
+
+        const DEFAULT_DATA = {
+            rainfall: 18.5, // มม. (เริ่มต้นอยู่ในเกณฑ์ปกติ < 30 มม.)
+            m177: 240.10,
+            m192: 200.50,
+            m191: 192.40,
+            m164: 174.20,
+            damVolume: 198.50,
+            damInflow: 5.20,
+            damOutflow: 3.80,
+            lastUpdated: new Date().toLocaleString('th-TH')
+        };
+
+        let appData = {};
+        let lineChart = null;
+        let damGaugeChart = null;
+        let isAdminLoggedIn = false;
+
+        // Initialize Application
+        window.onload = function() {
+            loadPersistedData();
+            fetchKoratWeather();
+            initCharts();
+            renderAllViews();
+        };
+
+        // Load Persisted Data from localStorage
+        function loadPersistedData() {
+            const saved = localStorage.getItem('korat_flood_system_data');
+            if (saved) {
+                try {
+                    appData = JSON.parse(saved);
+                } catch(e) {
+                    appData = { ...DEFAULT_DATA };
+                }
             } else {
-                gaugeStatusEl.className = 'inline-block text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800';
-                gaugeStatusEl.innerText = 'ระดับน้ำค่อนข้างน้อย';
+                appData = { ...DEFAULT_DATA };
             }
-
-            // Animate Waves Height according to reservoir percentage (Range: bottom -95% to -10%)
-            const waveBottomPercent = -95 + (Math.min(percent, 100) * 0.85);
-            document.getElementById('waterWave1').style.bottom = `${waveBottomPercent}%`;
-            document.getElementById('waterWave2').style.bottom = `${waveBottomPercent - 3}%`;
-
-            // Adjust water badge bottom height visually
-            const badgeBottomPercent = Math.max(10, Math.min(percent * 0.75, 75));
-            document.getElementById('waterLevelBadge').style.bottom = `${badgeBottomPercent}%`;
-
-            analyzeRiskConditions();
-
-            if (chartInstance) updateChart();
-            if (reservoirGaugeChart) updateReservoirGaugeChart(percent);
         }
 
-        async function fetchWeatherForecast() {
-            const lat = 14.9683;
-            const lon = 102.08603;
-            const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FBangkok`;
+        // Save Data Persistently
+        function saveDataToStorage() {
+            appData.lastUpdated = new Date().toLocaleString('th-TH');
+            localStorage.setItem('korat_flood_system_data', JSON.stringify(appData));
+            renderAllViews();
+            updateCharts();
+        }
 
-            try {
-                const res = await fetch(weatherUrl);
-                if (!res.ok) throw new Error('Network error');
-                const data = await res.json();
-                
-                const current = data.current;
-                document.getElementById('currentTemp').innerText = Math.round(current.temperature_2m);
-                document.getElementById('currentHumidity').innerText = current.relative_humidity_2m;
-                document.getElementById('currentWindSpeed').innerText = current.wind_speed_10m.toFixed(1);
-                
-                const weatherMeta = getWeatherInterpretation(current.weather_code);
-                document.getElementById('currentCondition').innerText = weatherMeta.text;
-                document.getElementById('currentWeatherIcon').innerHTML = `<i class="${weatherMeta.icon}"></i>`;
+        // Reset to Factory System Default
+        function resetDefaultData() {
+            if (confirm("คุณต้องการรีเซ็ตข้อมูลทั้งหมดกลับเป็นค่าเริ่มต้นระบบใช่หรือไม่?")) {
+                appData = { ...DEFAULT_DATA };
+                saveDataToStorage();
+                closeAdminModal();
+            }
+        }
 
-                document.getElementById('currentRainProb').innerText = data.daily.precipitation_probability_max[0] || 0;
+        // Main Rendering Orchestration
+        function renderAllViews() {
+            document.getElementById('lastUpdatedTime').innerHTML = `<i class="fa-regular fa-clock me-1"></i>อัปเดตล่าสุด: ${appData.lastUpdated}`;
+            
+            // Render Rainfall Display
+            document.getElementById('rainDisplayValue').innerText = appData.rainfall.toFixed(1);
 
-                const forecastContainer = document.getElementById('forecastContainer');
-                forecastContainer.innerHTML = '';
-                const thaiDays = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+            // Update Station Numerical Display
+            document.getElementById('stM177Val').innerText = appData.m177.toFixed(2);
+            document.getElementById('stM192Val').innerText = appData.m192.toFixed(2);
+            document.getElementById('stM191Val').innerText = appData.m191.toFixed(2);
+            document.getElementById('stM164Val').innerText = appData.m164.toFixed(2);
 
-                for (let i = 0; i < 5; i++) {
-                    const dateObj = new Date(data.daily.time[i]);
-                    const dayName = thaiDays[dateObj.getDay()];
-                    const dateStr = `${dateObj.getDate()}/${dateObj.getMonth() + 1}`;
-                    const maxTemp = Math.round(data.daily.temperature_2m_max[i]);
-                    const minTemp = Math.round(data.daily.temperature_2m_min[i]);
-                    const rainProb = data.daily.precipitation_probability_max[i] || 0;
-                    const dayMeta = getWeatherInterpretation(data.daily.weather_code[i]);
+            // Dam Display Updates
+            const damPercent = Math.min(100, Math.max(0, (appData.damVolume / DAM_CAPACITY) * 100));
+            document.getElementById('damPercentText').innerText = damPercent.toFixed(1) + '%';
+            document.getElementById('damCurrentVol').innerText = `${appData.damVolume.toFixed(2)} ล้าน ม.³ (${damPercent.toFixed(1)}%)`;
+            document.getElementById('damInflow').innerText = `${appData.damInflow.toFixed(2)} ม.³/วิ`;
+            document.getElementById('damOutflow').innerText = `${appData.damOutflow.toFixed(2)} ม.³/วิ`;
 
-                    const card = document.createElement('div');
-                    card.className = 'bg-slate-50 p-2.5 sm:p-3 rounded-xl border border-slate-200 text-center flex flex-col justify-between hover:border-blue-300 transition';
-                    card.innerHTML = `
+            // Adjust Static Dam Water Level Graphic
+            document.getElementById('staticWaterFill').style.height = `${damPercent}%`;
+
+            // Evaluate Rainfall Threshold Rules & Hide/Show Affected Areas
+            evaluateRainfallRules();
+
+            // Evaluate 6 River Water Conditions (Display ONLY when active)
+            evaluateWaterRules();
+        }
+
+        // Feature 1: Dynamic Rainfall Risk Analysis & Conditional Zone Display
+        function evaluateRainfallRules() {
+            const rain = appData.rainfall;
+
+            const alertBar = document.getElementById('rainRiskAlertBar');
+            const alertIcon = document.getElementById('rainRiskIcon');
+            const alertTitle = document.getElementById('rainRiskTitle');
+            const alertSub = document.getElementById('rainRiskSubtitle');
+
+            const impactContainer = document.getElementById('rainImpactedContainer');
+            const zSaveOne = document.getElementById('zoneSaveOne');
+            const zNongPhai = document.getElementById('zoneNongPhaiLom');
+            const zBenjarong = document.getElementById('zoneBenjarong');
+            const zTechno = document.getElementById('zoneTechno');
+            const zRoads = document.getElementById('zoneRoads');
+
+            if (rain >= 51) { // Red Critical
+                alertBar.className = "p-4 rounded-xl border transition flex items-center justify-between bg-red-50 border-red-300 ring-2 ring-red-200 animate-pulse";
+                alertIcon.className = "fa-solid fa-triangle-exclamation text-2xl text-red-600";
+                alertTitle.className = "font-bold text-sm text-red-900";
+                alertTitle.innerText = `สถานะแจ้งเตือน: วิกฤติ (ปริมาณฝนสะสม ${rain.toFixed(1)} มม. ≥ 51 มม.)`;
+                alertSub.innerText = "เกิดฝนตกหนักมาก! ชุมชนในเขตเสี่ยงภัยและจุดกลับรถ/ผิวจราจรเสี่ยงท่วมขังฉับพลันสูงมาก";
+
+                impactContainer.classList.remove('hidden');
+                setZoneActiveStyles([zSaveOne, zNongPhai, zBenjarong, zTechno], zRoads, 'red');
+
+            } else if (rain >= 36) { // Orange Warning
+                alertBar.className = "p-4 rounded-xl border transition flex items-center justify-between bg-orange-50 border-orange-300 ring-1 ring-orange-200";
+                alertIcon.className = "fa-solid fa-triangle-exclamation text-2xl text-orange-600";
+                alertTitle.className = "font-bold text-sm text-orange-900";
+                alertTitle.innerText = `สถานะแจ้งเตือน: เตือนภัยน้ำท่วม (ปริมาณฝนสะสม ${rain.toFixed(1)} มม.)`;
+                alertSub.innerText = "ฝนตกหนัก! ระดับน้ำท่วมขังผิวจราจรขยายตัวและเอ่อล้นเข้าชุมชนลุ่มต่ำ";
+
+                impactContainer.classList.remove('hidden');
+                setZoneActiveStyles([zSaveOne, zNongPhai, zBenjarong, zTechno], zRoads, 'orange');
+
+            } else if (rain >= 30) { // Yellow Caution
+                alertBar.className = "p-4 rounded-xl border transition flex items-center justify-between bg-yellow-50 border-yellow-300";
+                alertIcon.className = "fa-solid fa-circle-exclamation text-2xl text-yellow-600";
+                alertTitle.className = "font-bold text-sm text-yellow-900";
+                alertTitle.innerText = `สถานะแจ้งเตือน: เฝ้าระวัง (ปริมาณฝนสะสม ${rain.toFixed(1)} มม.)`;
+                alertSub.innerText = "ฝนตกปานกลางถึงหนัก เฝ้าระวังพื้นที่ลุ่มต่ำและจุดกลับรถใต้สะพาน";
+
+                impactContainer.classList.remove('hidden');
+                setZoneActiveStyles([zSaveOne, zNongPhai, zBenjarong, zTechno], zRoads, 'yellow');
+
+            } else { // Normal (< 30 mm) -> Hide Affected Areas Completely
+                alertBar.className = "p-4 rounded-xl border transition flex items-center justify-between bg-emerald-50 border-emerald-200";
+                alertIcon.className = "fa-solid fa-circle-check text-2xl text-emerald-600";
+                alertTitle.className = "font-bold text-sm text-emerald-900";
+                alertTitle.innerText = `ปริมาณน้ำฝนอยู่ในเกณฑ์ปกติ (${rain.toFixed(1)} มม. < 30 มม.)`;
+                alertSub.innerText = "ยังไม่เข้าเกณฑ์เฝ้าระวังภัยพื้นที่ชุมชนและผิวจราจร";
+
+                impactContainer.classList.add('hidden');
+            }
+        }
+
+        function setZoneActiveStyles(zones, roadZone, level) {
+            let bgClass = "bg-yellow-50/80 border-yellow-300 text-yellow-900";
+            let roadBg = "bg-amber-100/90 border-amber-300 text-amber-950 font-semibold";
+
+            if (level === 'orange') {
+                bgClass = "bg-orange-50/90 border-orange-300 text-orange-900";
+                roadBg = "bg-orange-100 border-orange-400 text-orange-950 font-semibold";
+            } else if (level === 'red') {
+                bgClass = "bg-red-50/90 border-red-300 text-red-950 font-semibold";
+                roadBg = "bg-red-100 border-red-400 text-red-950 font-bold";
+            }
+
+            zones.forEach(z => {
+                z.className = `${bgClass} p-4 rounded-xl border shadow-sm transition`;
+            });
+            roadZone.className = `${roadBg} p-4 rounded-xl border shadow-sm transition md:col-span-2 lg:col-span-1`;
+        }
+
+        // Feature 2: Evaluate 6 River Water Conditions (Shows items ONLY when active)
+        function evaluateWaterRules() {
+            const m191 = appData.m191;
+            const m164 = appData.m164;
+
+            // Difference relative to bank levels (M191 bank = 195.30, M164 bank = 177.60)
+            const m191DiffCm = (m191 - 195.30) * 100;
+            const m164DiffCm = (m164 - 177.60) * 100;
+
+            const rules = [
+                {
+                    id: 1,
+                    title: "เงื่อนไข 1: M.191 เตือนภัยเฝ้าระวัง (195.00 ม.รทก.)",
+                    desc: "ถ้าระดับน้ำถึง 195.00 ม.รทก. แจ้งเตือน เฝ้าระวัง (สีเหลือง)",
+                    active: (m191 >= 195.00 && m191 < 195.40),
+                    statusText: "เฝ้าระวัง (สีเหลือง)",
+                    color: "yellow",
+                    communities: "ชุมชนที่ได้รับผลกระทบ: มิตรภาพ ซ.4/คุ้มวงษ์, ตะคลองเก่า, สำโรงจันทร์, บุมะค่า, ท่าตะโกพัฒนา"
+                },
+                {
+                    id: 2,
+                    title: "เงื่อนไข 2: M.191 ล้นตลิ่ง 10-20 ซม.",
+                    desc: "ถ้าระดับน้ำเพิ่มขึ้น 10-20 ซม. (ล้นตลิ่ง)",
+                    active: (m191DiffCm >= 10 && m191DiffCm <= 20),
+                    statusText: "เตือนภัย (ส้ม) / เฝ้าระวัง (เหลือง)",
+                    color: "orange",
+                    communities: "เตือนภัย (ส้ม): มิตรภาพ ซ.4/คุ้มวงษ์, ตะคลองเก่า, สำโรงจันทร์, บุมะค่า, ท่าตะโกพัฒนา\nเฝ้าระวัง (เหลือง): อรุณสามัคคีโชคดี, VIP, หลัง รพ.เซนต์แมรี่, โพธิ์ทอง, เกษตรสามัคคี 1-2"
+                },
+                {
+                    id: 3,
+                    title: "เงื่อนไข 3: M.164 ระดับ 177.00 ม.รทก.",
+                    desc: "ถ้าระดับน้ำถึง 177.00 ม.รทก. แจ้งเตือน อพยพ (สีแดง)",
+                    active: (m164 >= 177.00 && m164 < 177.70),
+                    statusText: "อพยพ (สีแดง)",
+                    color: "red",
+                    communities: "ชุมชนที่ได้รับผลกระทบ: มิตรภาพ ซ.4/คุ้มวงษ์, ตะคลองเก่า, สำโรงจันทร์, บุมะค่า, ท่าตะโกพัฒนา"
+                },
+                {
+                    id: 4,
+                    title: "เงื่อนไข 4: M.164 ล้นตลิ่ง 10-20 ซม.",
+                    desc: "ถ้าระดับน้ำเพิ่มขึ้น 10-20 ซม. (ล้นตลิ่ง)",
+                    active: (m164DiffCm >= 10 && m164DiffCm < 20),
+                    statusText: "เตือนภัย (สีส้ม)",
+                    color: "orange",
+                    communities: "ชุมชนที่ได้รับผลกระทบ: สวนหม่อน, หลังวัดสามัคคี, อบอุ่นพัฒนา, วัดศาลาลอย, มหาชัย-อุดมพร, 30 กันยา, ปลายนาสามัคคี, เทคโนวิลเลจ"
+                },
+                {
+                    id: 5,
+                    title: "เงื่อนไข 5: M.164 ล้นตลิ่ง 20-30 ซม.",
+                    desc: "ถ้าระดับน้ำเพิ่มขึ้น 20-30 ซม. ขึ้นไป (ล้นตลิ่ง)",
+                    active: (m164DiffCm >= 20),
+                    statusText: "อพยพวิกฤติ (สีแดง)",
+                    color: "red",
+                    communities: "แจ้งเตือนอพยพ (สีแดง): ทุกชุมชนตามแนวลุ่มน้ำลำตะคองเขตเทศบาลนครนครราชสีมา"
+                },
+                {
+                    id: 6,
+                    title: "เงื่อนไข 6: ระดับน้ำต่ำกว่าตลิ่ง ≥ 15 ซม.",
+                    desc: "ถ้า M.191 และ M.164 ต่ำกว่าตลิ่ง 15 ซม.",
+                    active: (m191 < 195.15 && m164 < 177.45),
+                    statusText: "สถานการณ์ปกติ (สีเขียว)",
+                    color: "green",
+                    communities: "สถานการณ์น้ำปกติ ต่ำกว่าตลิ่งมากกว่า 15 ซม. ทุกชุมชนปลอดภัย"
+                }
+            ];
+
+            const container = document.getElementById('rulesContainer');
+            container.innerHTML = '';
+
+            let topActiveColor = 'green';
+            let mainTitle = 'สถานการณ์ระดับน้ำลุ่มน้ำลำตะคองอยู่ในเกณฑ์ปกติ';
+            let mainDesc = 'ระดับน้ำ ณ สถานี M.191 และ M.164 ต่ำกว่าระดับตลิ่งเกินกว่า 15 ซม. ทุกพื้นที่ปลอดภัย';
+
+            const activeRules = rules.filter(r => r.active);
+
+            if (activeRules.length === 0 || (activeRules.length === 1 && activeRules[0].color === 'green')) {
+                // Show clean normal status card when no warning conditions are triggered
+                container.innerHTML = `
+                    <div class="col-span-full p-5 rounded-2xl border border-emerald-300 bg-emerald-50/60 flex items-center gap-4">
+                        <i class="fa-solid fa-circle-check text-3xl text-emerald-600"></i>
                         <div>
-                            <div class="text-xs font-bold text-slate-700">${i === 0 ? 'วันนี้' : dayName + ' ' + dateStr}</div>
-                            <div class="my-1.5 sm:my-2 text-xl sm:text-2xl ${dayMeta.color}">
-                                <i class="${dayMeta.icon}"></i>
-                            </div>
-                            <div class="text-[11px] sm:text-xs text-slate-600 font-medium truncate">${dayMeta.text}</div>
+                            <h4 class="font-bold text-slate-800 text-sm">สภาวะน้ำในลำน้ำปกติ ไม่พบชุมชนเข้าเกณฑ์เฝ้าระวัง/เตือนภัย</h4>
+                            <p class="text-xs text-slate-600 mt-0.5">ระดับน้ำ M.191 และ M.164 อยู่ต่ำกว่าระดับตลิ่งอยู่ในเกณฑ์ปลอดภัย ไม่มีชุมชนได้รับผลกระทบในขณะนี้</p>
                         </div>
-                        <div class="mt-2 pt-1.5 border-t border-slate-200/80 text-[10px] sm:text-[11px]">
-                            <div class="text-slate-700 font-bold">${maxTemp}° / <span class="text-slate-400 font-normal">${minTemp}°</span></div>
-                            <div class="text-blue-600 mt-0.5"><i class="fa-solid fa-umbrella text-[9px] mr-1"></i>ฝน ${rainProb}%</div>
+                    </div>
+                `;
+            } else {
+                // Render ONLY active warning rules & communities
+                activeRules.forEach(rule => {
+                    let badgeStyle = "bg-slate-100 text-slate-500";
+                    let cardBorder = "border-slate-200 bg-white";
+
+                    if (rule.color === 'yellow') {
+                        badgeStyle = "bg-yellow-100 text-yellow-900 font-bold";
+                        cardBorder = "border-yellow-400 bg-yellow-50/80 ring-2 ring-yellow-200";
+                        if (topActiveColor !== 'red' && topActiveColor !== 'orange') {
+                            topActiveColor = 'yellow';
+                            mainTitle = 'สถานะเฝ้าระวังระดับน้ำลุ่มน้ำลำตะคอง';
+                            mainDesc = rule.communities;
+                        }
+                    } else if (rule.color === 'orange') {
+                        badgeStyle = "bg-orange-100 text-orange-900 font-bold";
+                        cardBorder = "border-orange-400 bg-orange-50/90 ring-2 ring-orange-200";
+                        if (topActiveColor !== 'red') {
+                            topActiveColor = 'orange';
+                            mainTitle = 'เตือนภัยน้ำล้นตลิ่ง (สีส้ม) ลุ่มน้ำลำตะคอง';
+                            mainDesc = rule.communities;
+                        }
+                    } else if (rule.color === 'red') {
+                        badgeStyle = "bg-red-600 text-white font-bold animate-pulse";
+                        cardBorder = "border-red-500 bg-red-50 ring-2 ring-red-300";
+                        topActiveColor = 'red';
+                        mainTitle = 'เตือนภัยอพยพวิกฤติ! ระดับน้ำล้นตลิ่งเขตเทศบาล';
+                        mainDesc = rule.communities;
+                    }
+
+                    container.innerHTML += `
+                        <div class="p-4 rounded-xl border ${cardBorder} transition flex flex-col justify-between shadow-sm">
+                            <div>
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-xs font-bold text-slate-800">${rule.title}</span>
+                                    <span class="text-[10px] px-2 py-0.5 rounded-full ${badgeStyle}">${rule.statusText}</span>
+                                </div>
+                                <p class="text-xs text-slate-600 mb-2">${rule.desc}</p>
+                            </div>
+                            <div class="text-[11px] text-slate-800 border-t border-slate-200 pt-2 mt-2 font-medium whitespace-pre-line">
+                                <i class="fa-solid fa-triangle-exclamation me-1 text-amber-600"></i>${rule.communities}
+                            </div>
                         </div>
                     `;
-                    forecastContainer.appendChild(card);
-                }
+                });
+            }
 
-                const now = new Date();
-                document.getElementById('weatherUpdatedTime').innerText = `อัปเดตวันนี้ ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} น.`;
-            } catch (err) {
-                console.error('Weather Fetch Error:', err);
-                document.getElementById('currentCondition').innerText = 'ไม่สามารถดึงข้อมูลได้';
-                document.getElementById('weatherUpdatedTime').innerText = 'อัปเดตล้มเหลว';
+            // Quick Badge update
+            const badgeContainer = document.getElementById('quickBadgeContainer');
+            badgeContainer.innerHTML = `
+                <span class="px-2.5 py-1 rounded-md bg-blue-100 text-blue-900"><i class="fa-solid fa-water me-1"></i>M.191: ${m191.toFixed(2)} ม.</span>
+                <span class="px-2.5 py-1 rounded-md bg-indigo-100 text-indigo-900"><i class="fa-solid fa-water me-1"></i>M.164: ${m164.toFixed(2)} ม.</span>
+                <span class="px-2.5 py-1 rounded-md bg-teal-100 text-teal-900"><i class="fa-solid fa-cloud-rain me-1"></i>ฝนสะสม: ${appData.rainfall.toFixed(1)} มม.</span>
+            `;
+
+            // Adjust main status banner
+            if (appData.rainfall < 30) {
+                const mainCard = document.getElementById('mainStatusCard');
+                document.getElementById('overallAlertTitle').innerText = mainTitle;
+                document.getElementById('overallAlertDesc').innerText = mainDesc;
+
+                if (topActiveColor === 'red') {
+                    mainCard.className = "lg:col-span-2 glass-card rounded-2xl p-5 shadow-sm border-l-8 border-red-600 bg-red-50/40";
+                } else if (topActiveColor === 'orange') {
+                    mainCard.className = "lg:col-span-2 glass-card rounded-2xl p-5 shadow-sm border-l-8 border-orange-500 bg-orange-50/40";
+                } else if (topActiveColor === 'yellow') {
+                    mainCard.className = "lg:col-span-2 glass-card rounded-2xl p-5 shadow-sm border-l-8 border-yellow-500 bg-yellow-50/40";
+                } else {
+                    mainCard.className = "lg:col-span-2 glass-card rounded-2xl p-5 shadow-sm border-l-8 border-emerald-500 bg-emerald-50/40";
+                }
             }
         }
 
-        function getWeatherInterpretation(code) {
-            if (code === 0) return { text: 'แจ่มใส', icon: 'fa-solid fa-sun text-amber-500', color: 'text-amber-500' };
-            if (code >= 1 && code <= 3) return { text: 'มีเมฆบางส่วน', icon: 'fa-solid fa-cloud-sun text-amber-400', color: 'text-amber-400' };
-            if (code >= 45 && code <= 48) return { text: 'มีหมอก', icon: 'fa-solid fa-smog text-slate-400', color: 'text-slate-400' };
-            if (code >= 51 && code <= 55) return { text: 'ฝนปรอยๆ', icon: 'fa-solid fa-cloud-rain text-blue-400', color: 'text-blue-400' };
-            if (code >= 61 && code <= 65) return { text: 'ฝนตกปานกลาง', icon: 'fa-solid fa-cloud-showers-heavy text-blue-500', color: 'text-blue-500' };
-            if (code >= 80 && code <= 82) return { text: 'ฝนฟ้าคะนอง', icon: 'fa-solid fa-cloud-bolt text-indigo-600', color: 'text-indigo-600' };
-            if (code >= 95) return { text: 'พายุฝนฟ้าคะนอง', icon: 'fa-solid fa-bolt-lightning text-red-500', color: 'text-red-500' };
-            return { text: 'เมฆเป็นส่วนมาก', icon: 'fa-solid fa-cloud text-blue-400', color: 'text-blue-400' };
-        }
-
-        function initChart() {
-            const ctx = document.getElementById('waterLevelChart').getContext('2d');
-            chartInstance = new Chart(ctx, {
+        // Initialize Chart.js Elements
+        function initCharts() {
+            // 1. Line Chart for 4 Stations Water Level vs Bank Level
+            const ctxLine = document.getElementById('waterLineChart').getContext('2d');
+            lineChart = new Chart(ctxLine, {
                 type: 'line',
                 data: {
-                    labels: appData.stations.map(s => `${s.id} (${s.name.split(' ')[0]})`),
+                    labels: ['M.177 ลาดบัวขาว', 'M.192 โนนค่า', 'M.191 โคกกรวด', 'M.164 ต.ในเมือง'],
                     datasets: [
                         {
                             label: 'ระดับน้ำปัจจุบัน (ม.รทก.)',
-                            data: appData.stations.map(s => s.level),
-                            borderColor: '#1e88e5',
-                            backgroundColor: 'rgba(30, 136, 229, 0.15)',
+                            data: [appData.m177, appData.m192, appData.m191, appData.m164],
+                            borderColor: '#1d4ed8',
+                            backgroundColor: 'rgba(29, 78, 216, 0.15)',
                             borderWidth: 3,
-                            pointBackgroundColor: '#0d47a1',
-                            pointBorderColor: '#ffffff',
+                            fill: true,
+                            tension: 0.3,
+                            pointBackgroundColor: '#1d4ed8',
                             pointRadius: 6,
-                            pointHoverRadius: 8,
-                            tension: 0.2,
-                            fill: true
+                            pointHoverRadius: 8
                         },
                         {
                             label: 'ระดับตลิ่ง (ม.รทก.)',
-                            data: appData.stations.map(s => s.bank),
+                            data: [STATIONS.M177.bank, STATIONS.M192.bank, STATIONS.M191.bank, STATIONS.M164.bank],
                             borderColor: '#ef4444',
-                            backgroundColor: 'transparent',
-                            borderWidth: 2.5,
-                            borderDash: [6, 6],
-                            pointBackgroundColor: '#dc2626',
-                            pointBorderColor: '#ffffff',
-                            pointRadius: 5,
-                            pointHoverRadius: 7,
-                            tension: 0.1
+                            borderWidth: 2,
+                            borderDash: [6, 4],
+                            fill: false,
+                            tension: 0.3,
+                            pointBackgroundColor: '#ef4444',
+                            pointRadius: 4
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
-                    },
                     plugins: {
-                        legend: { position: 'top' },
-                        tooltip: {
-                            padding: 10,
-                            callbacks: {
-                                label: function(context) {
-                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(2)} ม.รทก.`;
-                                }
-                            }
-                        }
+                        legend: { position: 'top', labels: { font: { family: 'Prompt', size: 11 } } },
+                        tooltip: { mode: 'index', intersect: false }
                     },
                     scales: {
-                        y: { 
-                            beginAtZero: false, 
-                            title: { display: true, text: 'ระดับน้ำ (ม.รทก.)' } 
-                        }
+                        y: {
+                            beginAtZero: false,
+                            min: 160,
+                            ticks: { font: { family: 'Prompt', size: 10 } }
+                        },
+                        x: { ticks: { font: { family: 'Prompt', size: 11 } } }
                     }
                 }
             });
-        }
 
-        function initReservoirGaugeChart() {
-            const ctx = document.getElementById('reservoirGaugeChart').getContext('2d');
-            const percent = (appData.dam.volume / appData.dam.maxCapacity) * 100;
-            
-            reservoirGaugeChart = new Chart(ctx, {
+            // 2. Dam Gauge Donut Chart
+            const ctxDam = document.getElementById('damGaugeChart').getContext('2d');
+            const percent = Math.min(100, Math.max(0, (appData.damVolume / DAM_CAPACITY) * 100));
+
+            damGaugeChart = new Chart(ctxDam, {
                 type: 'doughnut',
                 data: {
-                    labels: ['ปริมาตรน้ำในอ่าง', 'ความจุว่างที่รองรับได้'],
+                    labels: ['ปริมาณน้ำ', 'ความจุที่เหลือ'],
                     datasets: [{
-                        data: [percent, Math.max(0, 100 - percent)],
+                        data: [percent, 100 - percent],
                         backgroundColor: ['#0284c7', '#e2e8f0'],
-                        borderWidth: 0,
-                        hoverOffset: 4
+                        borderWidth: 0
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '76%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(ctx) {
-                                    return `${ctx.label}: ${ctx.raw.toFixed(2)}%`;
-                                }
-                            }
-                        }
-                    }
+                    cutout: '75%',
+                    plugins: { legend: { display: false } }
                 }
             });
         }
 
-        function updateReservoirGaugeChart(percent) {
-            if (!reservoirGaugeChart) return;
-            reservoirGaugeChart.data.datasets[0].data = [percent, Math.max(0, 100 - percent)];
-            reservoirGaugeChart.data.datasets[0].backgroundColor[0] = percent >= 80 ? '#ef4444' : percent >= 50 ? '#0284c7' : '#f59e0b';
-            reservoirGaugeChart.update();
+        function updateCharts() {
+            if (lineChart) {
+                lineChart.data.datasets[0].data = [appData.m177, appData.m192, appData.m191, appData.m164];
+                lineChart.update();
+            }
+
+            if (damGaugeChart) {
+                const percent = Math.min(100, Math.max(0, (appData.damVolume / DAM_CAPACITY) * 100));
+                damGaugeChart.data.datasets[0].data = [percent, 100 - percent];
+                damGaugeChart.update();
+            }
         }
 
-        function updateChart() {
-            chartInstance.data.labels = appData.stations.map(s => `${s.id} (${s.name.split(' ')[0]})`);
-            chartInstance.data.datasets[0].data = appData.stations.map(s => s.level);
-            chartInstance.data.datasets[1].data = appData.stations.map(s => s.bank);
-            chartInstance.update();
+        // Fetch Weather API
+        async function fetchKoratWeather() {
+            try {
+                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=14.9707&longitude=102.1019&current_weather=true&hourly=relativehumidity_2m');
+                if (res.ok) {
+                    const data = await res.json();
+                    const cw = data.current_weather;
+                    document.getElementById('weatherTemp').innerText = `${cw.temperature} °C`;
+                    document.getElementById('weatherWind').innerText = `${cw.windspeed} km/h`;
+                    document.getElementById('weatherHumidity').innerText = `78%`;
+
+                    let cond = "ท้องฟ้าแจ่มใส";
+                    let iconClass = "fa-solid fa-sun text-amber-500";
+                    if (cw.weathercode >= 51) {
+                        cond = "มีฝนตกชุก";
+                        iconClass = "fa-solid fa-cloud-showers-heavy text-blue-500";
+                    } else if (cw.weathercode >= 1) {
+                        cond = "มีเมฆบางส่วน";
+                        iconClass = "fa-solid fa-cloud-sun text-sky-400";
+                    }
+
+                    document.getElementById('weatherCondition').innerText = cond;
+                    document.getElementById('weatherIcon').className = `${iconClass} text-4xl`;
+                }
+            } catch (e) {
+                document.getElementById('weatherCondition').innerText = "เชื่อมต่อสภาพอากาศล้มเหลว";
+            }
         }
 
-        function openLoginModal() {
-            if (isLoggedIn) openEditModal();
-            else document.getElementById('loginModal').classList.remove('hidden');
+        // Admin Modal Logic
+        function openAdminModal() {
+            document.getElementById('adminModal').classList.remove('hidden');
+            if (isAdminLoggedIn) {
+                showAdminControl();
+            } else {
+                document.getElementById('adminAuthSection').classList.remove('hidden');
+                document.getElementById('adminControlSection').classList.add('hidden');
+            }
         }
 
-        function closeLoginModal() {
-            document.getElementById('loginModal').classList.add('hidden');
-            document.getElementById('loginError').classList.add('hidden');
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
         }
 
-        function handleLogin(e) {
+        function handleAdminLogin(e) {
             e.preventDefault();
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
+            const u = document.getElementById('adminUser').value;
+            const p = document.getElementById('adminPass').value;
 
             if (u === 'admin' && p === '1234') {
-                isLoggedIn = true;
-                closeLoginModal();
-                document.getElementById('adminStatusText').innerText = 'แผงควบคุมเจ้าหน้าที่';
-                openEditModal();
+                isAdminLoggedIn = true;
+                document.getElementById('authError').classList.add('hidden');
+                showAdminControl();
             } else {
-                document.getElementById('loginError').classList.remove('hidden');
+                document.getElementById('authError').classList.remove('hidden');
             }
         }
 
-        function openEditModal() {
-            document.getElementById('editRain24h').value = appData.rain24h;
-            
-            const container = document.getElementById('editStationsContainer');
-            container.innerHTML = '';
-            appData.stations.forEach((st, idx) => {
-                const div = document.createElement('div');
-                div.className = 'grid grid-cols-4 gap-2 items-center bg-white p-2 rounded border border-slate-200 text-xs';
-                div.innerHTML = `
-                    <div class="font-bold text-korat-blue">${st.id}</div>
-                    <div>
-                        <label class="text-[10px] text-slate-400 block">ระดับน้ำ (ม.รทก.)</label>
-                        <input type="number" step="0.01" id="st_level_${idx}" value="${st.level}" class="w-full px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500 font-bold text-slate-800">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-slate-400 block">ตลิ่ง (ม.รทก.)</label>
-                        <input type="number" step="0.01" id="st_bank_${idx}" value="${st.bank}" class="w-full px-2 py-1 border rounded bg-slate-50 text-slate-500" readonly>
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-slate-400 block">อัตราไหล</label>
-                        <input type="number" step="0.01" id="st_flow_${idx}" value="${st.flow}" class="w-full px-2 py-1 border rounded">
-                    </div>
-                `;
-                container.appendChild(div);
-            });
+        function showAdminControl() {
+            document.getElementById('adminAuthSection').classList.add('hidden');
+            document.getElementById('adminControlSection').classList.remove('hidden');
 
-            document.getElementById('editDamInflow').value = appData.dam.inflow;
-            document.getElementById('editDamVolume').value = appData.dam.volume;
-            document.getElementById('editDamOutflow').value = appData.dam.outflow;
-
-            document.getElementById('editModal').classList.remove('hidden');
+            document.getElementById('inputRainfall').value = appData.rainfall;
+            document.getElementById('inputM177').value = appData.m177;
+            document.getElementById('inputM192').value = appData.m192;
+            document.getElementById('inputM191').value = appData.m191;
+            document.getElementById('inputM164').value = appData.m164;
+            document.getElementById('inputDamVol').value = appData.damVolume;
+            document.getElementById('inputDamInflow').value = appData.damInflow;
+            document.getElementById('inputDamOutflow').value = appData.damOutflow;
         }
 
-        function closeEditModal() {
-            document.getElementById('editModal').classList.add('hidden');
-        }
-
-        function setRulePreset(ruleNumber) {
-            const m191 = appData.stations.find(s => s.id === 'M191');
-            const m164 = appData.stations.find(s => s.id === 'M164');
-
-            switch(ruleNumber) {
-                case 1:
-                    m191.level = 195.10;
-                    m164.level = 142.30;
-                    break;
-                case 2:
-                    m191.level = 195.45;
-                    m164.level = 142.30;
-                    break;
-                case 3:
-                    m191.level = 150.10;
-                    m164.level = 177.20;
-                    break;
-                case 4:
-                    m191.level = 150.10;
-                    m164.level = 177.75;
-                    break;
-                case 5:
-                    m191.level = 150.10;
-                    m164.level = 177.90;
-                    break;
-                case 6:
-                default:
-                    m191.level = 150.10;
-                    m164.level = 142.30;
-                    break;
-            }
-
-            openEditModal();
-        }
-
-        function saveData(e) {
+        function saveAdminData(e) {
             e.preventDefault();
-            appData.rain24h = parseFloat(document.getElementById('editRain24h').value) || 0;
+            appData.rainfall = parseFloat(document.getElementById('inputRainfall').value) || 0;
+            appData.m177 = parseFloat(document.getElementById('inputM177').value) || 0;
+            appData.m192 = parseFloat(document.getElementById('inputM192').value) || 0;
+            appData.m191 = parseFloat(document.getElementById('inputM191').value) || 0;
+            appData.m164 = parseFloat(document.getElementById('inputM164').value) || 0;
+            appData.damVolume = parseFloat(document.getElementById('inputDamVol').value) || 0;
+            appData.damInflow = parseFloat(document.getElementById('inputDamInflow').value) || 0;
+            appData.damOutflow = parseFloat(document.getElementById('inputDamOutflow').value) || 0;
 
-            appData.stations.forEach((st, idx) => {
-                st.level = parseFloat(document.getElementById(`st_level_${idx}`).value) || 0;
-                st.flow = parseFloat(document.getElementById(`st_flow_${idx}`).value) || 0;
-            });
-
-            appData.dam.inflow = parseFloat(document.getElementById('editDamInflow').value) || 0;
-            appData.dam.volume = parseFloat(document.getElementById('editDamVolume').value) || 0;
-            appData.dam.outflow = parseFloat(document.getElementById('editDamOutflow').value) || 0;
-
-            updateTimestamp();
-            renderData();
-            closeEditModal();
+            saveDataToStorage();
+            closeAdminModal();
+            alert("บันทึกและปรับปรุงข้อมูลลงระบบเรียบร้อยแล้ว");
         }
     </script>
 </body>
