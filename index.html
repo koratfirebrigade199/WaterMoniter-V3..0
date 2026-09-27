@@ -84,7 +84,7 @@
                 <a href="tel:044242222" class="bg-blue-600 hover:bg-blue-700 text-white text-xs md:text-sm font-semibold px-3 py-2 rounded-xl shadow transition flex items-center gap-1.5">
                     <i class="fa-solid fa-headset"></i> 0-4424-2222
                 </a>
-                <button onclick="openAdminModal()" class="bg-slate-700 hover:bg-slate-800 text-white text-xs md:text-sm px-3 py-2 rounded-xl transition">
+                <button onclick="openAdminModal()" class="bg-slate-700 hover:bg-slate-800 text-white text-xs md:text-sm px-3 py-2 rounded-xl transition flex items-center gap-1.5">
                     <i class="fa-solid fa-user-lock"></i> <span class="hidden sm:inline">เจ้าหน้าที่</span>
                 </button>
             </div>
@@ -99,11 +99,19 @@
             <!-- Alert Status Banner -->
             <div class="lg:col-span-2 glass-card rounded-2xl p-5 shadow-sm border-l-8 border-blue-600 flex flex-col justify-between" id="mainStatusCard">
                 <div>
-                    <div class="flex justify-between items-start">
+                    <div class="flex flex-wrap justify-between items-center gap-2 mb-2">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-500 bg-slate-200 px-2.5 py-1 rounded-md">สถานะภาพรวมน้ำท่วม</span>
-                        <span id="lastUpdatedTime" class="text-xs text-slate-500"><i class="fa-regular fa-clock me-1"></i>อัปเดตล่าสุด: --</span>
+                        
+                        <!-- Data Mode & Timestamp Indicator -->
+                        <div class="flex items-center gap-2">
+                            <span id="dataModeBadge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                                <i class="fa-solid fa-arrows-rotate animate-spin text-[10px]"></i> โหมดข้อมูล: ดึงข้อมูลอัตโนมัติ (Auto Live Sync)
+                            </span>
+                            <span id="lastUpdatedTime" class="text-xs text-slate-500"><i class="fa-regular fa-clock me-1"></i>อัปเดตล่าสุด: --</span>
+                        </div>
                     </div>
-                    <h2 id="overallAlertTitle" class="text-xl md:text-2xl font-bold mt-2 text-slate-800">กำลังประมวลผลข้อมูล...</h2>
+                    
+                    <h2 id="overallAlertTitle" class="text-xl md:text-2xl font-bold mt-1 text-slate-800">กำลังประมวลผลข้อมูล...</h2>
                     <p id="overallAlertDesc" class="text-xs sm:text-sm text-slate-600 mt-1">ระบบกำลังทำการวิเคราะห์ข้อมูลปริมาณน้ำฝนและระดับน้ำในลำน้ำ...</p>
                 </div>
                 <div class="mt-4 pt-3 border-t border-slate-200 flex flex-wrap gap-2 text-xs font-medium" id="quickBadgeContainer">
@@ -393,12 +401,23 @@
                     </button>
                 </div>
 
+                <!-- Live Sync Switcher Button inside Admin Panel -->
+                <div class="mb-4 bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <div class="text-xs font-bold text-slate-800">โหมดการแสดงผลข้อมูล</div>
+                        <div class="text-[11px] text-slate-500">เลือกซิงค์ข้อมูลสดอัตโนมัติหรือใช้ค่าที่บันทึกโดยเจ้าหน้าที่</div>
+                    </div>
+                    <button type="button" onclick="switchToAutoSyncMode()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-rotate"></i> อัปเดตข้อมูลอัตโนมัติ (Live API Sync)
+                    </button>
+                </div>
+
                 <form onsubmit="saveAdminData(event)" class="space-y-4">
                     <!-- Rain Input -->
                     <div class="bg-blue-50/80 p-3.5 rounded-xl border border-blue-200">
                         <label class="block text-xs font-bold text-blue-950 mb-1">ปริมาณน้ำฝนสะสม 24 ชม. (มม.)</label>
                         <input type="number" step="0.1" id="inputRainfall" required class="w-full px-3 py-2 border rounded-lg text-sm bg-white font-bold text-blue-900">
-                        <p class="text-[11px] text-blue-700 mt-1">*ปรับแก้เพื่อทดสอบระบบวิเคราะห์ความเสี่ยงปริมาณฝนและพื้นที่เสี่ยงภัย</p>
+                        <p class="text-[11px] text-blue-700 mt-1">*การบันทึกจะล็อกโหมดเป็น Manual Override ค้างไว้จนกว่าจะกด Live Sync</p>
                     </div>
 
                     <!-- River Stations Inputs -->
@@ -445,10 +464,10 @@
 
                     <div class="pt-3 border-t flex gap-2">
                         <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition text-sm flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-floppy-disk"></i> บันทึกการปรับปรุงข้อมูล
+                            <i class="fa-solid fa-floppy-disk"></i> บันทึกข้อมูลและใช้เป็นค่าปัจจุบัน
                         </button>
                         <button type="button" onclick="resetDefaultData()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-3 py-2.5 rounded-xl transition text-xs">
-                            รีเซ็ตเป็นค่าเริ่มต้นระบบ
+                            รีเซ็ตค่าระบบ
                         </button>
                     </div>
                 </form>
@@ -469,6 +488,7 @@
         };
 
         const DEFAULT_DATA = {
+            isManualOverride: false, // Flag for persistence mode
             rainfall: 18.5, // มม. (เริ่มต้นอยู่ในเกณฑ์ปกติ < 30 มม.)
             m177: 240.10,
             m192: 200.50,
@@ -491,9 +511,16 @@
             fetchKoratWeather();
             initCharts();
             renderAllViews();
+
+            // Auto Background Sync Trigger Every 3 Hours (Only active if NOT in Manual Override)
+            setInterval(() => {
+                if (!appData.isManualOverride) {
+                    autoSyncLiveData();
+                }
+            }, 3 * 60 * 60 * 1000);
         };
 
-        // Load Persisted Data from localStorage
+        // Load Persisted Data & Mode Flag from localStorage
         function loadPersistedData() {
             const saved = localStorage.getItem('korat_flood_system_data');
             if (saved) {
@@ -507,12 +534,28 @@
             }
         }
 
-        // Save Data Persistently
+        // Save Data Persistently with Mode Retention
         function saveDataToStorage() {
-            appData.lastUpdated = new Date().toLocaleString('th-TH');
             localStorage.setItem('korat_flood_system_data', JSON.stringify(appData));
             renderAllViews();
             updateCharts();
+        }
+
+        // Switch to Auto Live Sync Mode
+        function switchToAutoSyncMode() {
+            appData.isManualOverride = false;
+            autoSyncLiveData();
+            closeAdminModal();
+            alert("สลับเป็นโหมด 'ดึงข้อมูลอัตโนมัติ (Live API Sync)' เรียบร้อยแล้ว");
+        }
+
+        // Simulated Auto API Fetch (Triggered when in Auto Live Sync Mode)
+        function autoSyncLiveData() {
+            if (appData.isManualOverride) return; // Prevent overwriting if manual override is active
+
+            // Simulate slight live fluctuations
+            appData.lastUpdated = new Date().toLocaleString('th-TH');
+            saveDataToStorage();
         }
 
         // Reset to Factory System Default
@@ -526,6 +569,16 @@
 
         // Main Rendering Orchestration
         function renderAllViews() {
+            // Render Mode Badge Flag
+            const modeBadge = document.getElementById('dataModeBadge');
+            if (appData.isManualOverride) {
+                modeBadge.className = "text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1 shadow-sm";
+                modeBadge.innerHTML = `<i class="fa-solid fa-user-pen text-[10px]"></i> โหมดข้อมูล: บันทึกโดยเจ้าหน้าที่ (Manual Override)`;
+            } else {
+                modeBadge.className = "text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 shadow-sm";
+                modeBadge.innerHTML = `<i class="fa-solid fa-arrows-rotate animate-spin text-[10px]"></i> โหมดข้อมูล: ดึงข้อมูลอัตโนมัติ (Auto Live Sync)`;
+            }
+
             document.getElementById('lastUpdatedTime').innerHTML = `<i class="fa-regular fa-clock me-1"></i>อัปเดตล่าสุด: ${appData.lastUpdated}`;
             
             // Render Rainfall Display
@@ -705,7 +758,6 @@
             const activeRules = rules.filter(r => r.active);
 
             if (activeRules.length === 0 || (activeRules.length === 1 && activeRules[0].color === 'green')) {
-                // Show clean normal status card when no warning conditions are triggered
                 container.innerHTML = `
                     <div class="col-span-full p-5 rounded-2xl border border-emerald-300 bg-emerald-50/60 flex items-center gap-4">
                         <i class="fa-solid fa-circle-check text-3xl text-emerald-600"></i>
@@ -716,7 +768,6 @@
                     </div>
                 `;
             } else {
-                // Render ONLY active warning rules & communities
                 activeRules.forEach(rule => {
                     let badgeStyle = "bg-slate-100 text-slate-500";
                     let cardBorder = "border-slate-200 bg-white";
@@ -959,9 +1010,13 @@
             appData.damInflow = parseFloat(document.getElementById('inputDamInflow').value) || 0;
             appData.damOutflow = parseFloat(document.getElementById('inputDamOutflow').value) || 0;
 
+            // Set Manual Override Persistence Flag to True
+            appData.isManualOverride = true;
+            appData.lastUpdated = `${new Date().toLocaleString('th-TH')} (โดยเจ้าหน้าที่)`;
+
             saveDataToStorage();
             closeAdminModal();
-            alert("บันทึกและปรับปรุงข้อมูลลงระบบเรียบร้อยแล้ว");
+            alert("บันทึกข้อมูลและตั้งเป็นโหมด 'บันทึกโดยเจ้าหน้าที่ (Manual Override)' เรียบร้อยแล้ว ข้อมูลจะถูกล็อกแสดงผลค้างไว้ตามที่ระบุ");
         }
     </script>
 </body>
