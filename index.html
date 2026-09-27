@@ -44,6 +44,33 @@
             0%, 100% { background-color: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.8); }
             50% { background-color: rgba(239, 68, 68, 0.3); border-color: rgba(220, 38, 38, 1); }
         }
+        
+        /* Water Wave Animation Effect for Reservoir Graphic */
+        .wave-box {
+            position: relative;
+            overflow: hidden;
+        }
+        .wave {
+            position: absolute;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            background: rgba(14, 165, 233, 0.35);
+            border-radius: 40%;
+            animation: wave 10s linear infinite;
+            bottom: -80%;
+            transition: bottom 0.8s ease-in-out;
+        }
+        .wave:nth-child(2) {
+            animation: wave 14s linear infinite;
+            background: rgba(3, 105, 161, 0.5);
+            opacity: 0.8;
+            bottom: -83%;
+        }
+        @keyframes wave {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen flex flex-col text-slate-800 text-xs sm:text-sm md:text-base">
@@ -113,7 +140,6 @@
             </div>
 
             <div class="p-3.5 sm:p-5">
-                <!-- Community Risk Level Cards Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4" id="communityAlertGrid">
                     <!-- Dynamic rendering by analyzeRiskConditions() JS -->
                 </div>
@@ -192,41 +218,71 @@
             </div>
         </section>
 
-        <!-- Rain Station Section -->
+        <!-- Rain Station Section (Redesigned & Responsive Grid) -->
         <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="bg-slate-800 text-white px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+            <div class="bg-slate-800 text-white px-4 sm:px-6 py-3 sm:py-3.5 flex items-center justify-between">
                 <div class="flex items-center space-x-2 sm:space-x-3">
-                    <i class="fa-solid fa-cloud-showers-heavy text-korat-accent text-base sm:text-lg"></i>
+                    <div class="p-1.5 bg-blue-500/20 rounded-lg">
+                        <i class="fa-solid fa-cloud-showers-heavy text-korat-accent text-sm sm:text-base"></i>
+                    </div>
                     <h2 class="font-bold text-xs sm:text-sm md:text-base">ข้อมูลปริมาณน้ำฝน สถานีตรวจวัดนครราชสีมา</h2>
                 </div>
-                <span class="text-[10px] sm:text-xs text-slate-300">ต.หนองไผ่ล้อม อ.เมือง จ.นครราชสีมา</span>
+                <span class="text-[10px] sm:text-xs text-slate-300 bg-slate-700/60 px-2.5 py-1 rounded-full border border-slate-600/50">
+                    <i class="fa-solid fa-location-dot text-amber-400 mr-1"></i>ต.หนองไผ่ล้อม อ.เมืองนครราชสีมา
+                </span>
             </div>
+            
             <div class="p-3.5 sm:p-5">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 items-center">
-                    <div class="md:col-span-1 bg-blue-50/70 p-4 rounded-xl border border-blue-100 flex items-center space-x-4">
-                        <div class="p-3 bg-blue-500 text-white rounded-2xl text-2xl shrink-0">
-                            <i class="fa-solid fa-droplet"></i>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5 sm:gap-4 items-center">
+                    
+                    <!-- Rain Value Compact Card -->
+                    <div class="md:col-span-5 lg:col-span-4 bg-gradient-to-br from-blue-50 via-sky-50/50 to-indigo-50/40 p-4 rounded-xl border border-blue-100/80 shadow-sm flex items-center justify-between relative overflow-hidden">
+                        <div class="absolute -right-2 -bottom-2 text-blue-500/5 text-7xl pointer-events-none">
+                            <i class="fa-solid fa-cloud-showers-water"></i>
                         </div>
-                        <div>
-                            <div class="text-xs text-slate-500 font-medium">ปริมาณฝนสะสม 24 ชั่วโมง</div>
-                            <div class="text-xl sm:text-2xl md:text-3xl font-extrabold text-korat-blue mt-0.5">
-                                <span id="rain24h">18.5</span> <span class="text-xs sm:text-sm font-normal text-slate-600">มม.</span>
+                        <div class="flex items-center space-x-3.5 z-10">
+                            <div class="p-3 bg-gradient-to-tr from-blue-600 to-sky-400 text-white rounded-2xl shadow-md text-xl sm:text-2xl shrink-0">
+                                <i class="fa-solid fa-droplet"></i>
                             </div>
-                            <div id="rainStatus" class="inline-block mt-1 text-[11px] sm:text-xs px-2 py-0.5 rounded font-medium bg-blue-100 text-blue-700">ฝนตกเล็กน้อย</div>
+                            <div>
+                                <div class="text-[11px] sm:text-xs text-slate-500 font-semibold uppercase tracking-wider">ปริมาณฝนสะสม 24 ชั่วโมง</div>
+                                <div class="text-2xl sm:text-3xl font-black text-korat-blue mt-0.5 tracking-tight flex items-baseline space-x-1">
+                                    <span id="rain24h">18.5</span>
+                                    <span class="text-xs sm:text-sm font-normal text-slate-600">มม.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="z-10 text-right">
+                            <span id="rainStatus" class="inline-block text-[10px] sm:text-xs px-2.5 py-1 rounded-lg font-semibold bg-blue-100 text-blue-700 border border-blue-200/60 shadow-xs">ฝนตกเล็กน้อย</span>
                         </div>
                     </div>
 
-                    <div class="md:col-span-2">
-                        <div class="p-3.5 sm:p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center space-x-3">
-                            <div class="p-2.5 bg-emerald-100 text-emerald-700 rounded-lg text-lg shrink-0">
+                    <!-- Evaluation Banner -->
+                    <div class="md:col-span-7 lg:col-span-8 bg-slate-50/90 p-4 rounded-xl border border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2.5 bg-emerald-100/80 text-emerald-700 rounded-xl text-lg shrink-0 border border-emerald-200">
                                 <i class="fa-solid fa-shield-check"></i>
                             </div>
                             <div>
-                                <span class="text-xs text-slate-500 block">เกณฑ์การประเมินสภาวะฝน</span>
-                                <span id="rainRiskEval" class="text-xs sm:text-sm md:text-base font-semibold text-emerald-600 mt-0.5 block">สภาวะฝนสะสมอยู่ในเกณฑ์ปกติ</span>
+                                <span class="text-[11px] sm:text-xs text-slate-400 font-medium block">เกณฑ์การประเมินสภาวะฝนสะสม</span>
+                                <span id="rainRiskEval" class="text-xs sm:text-sm md:text-base font-bold text-emerald-600 mt-0.5 block">สภาวะฝนสะสมอยู่ในเกณฑ์ปกติ ปลอดภัยต่อเสี่ยงน้ำท่วมฉับพลัน</span>
+                            </div>
+                        </div>
+
+                        <!-- Mini Rain Gauge Bar -->
+                        <div class="w-full sm:w-48 shrink-0 space-y-1">
+                            <div class="flex justify-between text-[10px] font-medium text-slate-500">
+                                <span>ระดับความเสี่ยง</span>
+                                <span class="font-bold text-slate-700">ต่ำ</span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden flex">
+                                <div class="bg-blue-400 h-full w-1/3" title="ฝนตกเล็กน้อย (<35mm)"></div>
+                                <div class="bg-amber-400 h-full w-1/3" title="ฝนตกปานกลาง (35-90mm)"></div>
+                                <div class="bg-red-500 h-full w-1/3" title="ฝนตกหนัก (>90mm)"></div>
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </section>
@@ -274,51 +330,189 @@
             </div>
         </section>
 
-        <!-- Lam Takhong Reservoir Data Section -->
+        <!-- Lam Takhong Reservoir Data Section (Infographic Edition) -->
         <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="bg-slate-800 text-white px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+            <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-sky-950 text-white px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between">
                 <div class="flex items-center space-x-2 sm:space-x-3">
-                    <i class="fa-solid fa-dam text-amber-400 text-base sm:text-lg"></i>
-                    <h2 class="font-bold text-xs sm:text-sm md:text-base">ข้อมูลปริมาณน้ำอ่างเก็บน้ำลำตะคอง ต.คลองไผ่ อ.สีคิ้ว</h2>
+                    <div class="p-1.5 bg-amber-500/20 rounded-lg">
+                        <i class="fa-solid fa-dam text-amber-400 text-base sm:text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-xs sm:text-sm md:text-base">อินโฟกราฟิกปริมาณน้ำอ่างเก็บน้ำลำตะคอง</h2>
+                        <p class="text-[10px] sm:text-xs text-slate-300">ต.คลองไผ่ อ.สีคิ้ว จ.นครราชสีมา (ความจุเก็บกักสูงสุด 314.00 ล้าน ม.³)</p>
+                    </div>
                 </div>
+                <span class="text-[10px] sm:text-xs bg-sky-500/20 border border-sky-400/30 text-sky-200 px-3 py-1 rounded-full shrink-0 font-medium hidden sm:inline-block">
+                    <i class="fa-solid fa-droplet text-sky-400 mr-1"></i>อัปเดตเรียลไทม์
+                </span>
             </div>
 
-            <div class="p-3.5 sm:p-5">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                    <div class="bg-slate-50 p-3.5 sm:p-4 rounded-xl border border-slate-200">
-                        <div class="text-xs text-slate-500 font-medium">ปริมาตรน้ำท่าไหลเข้าเขื่อน</div>
-                        <div class="text-xl sm:text-2xl font-bold text-slate-800 mt-2">
-                            <span id="damInflow">0.42</span> <span class="text-xs font-normal text-slate-600">ล้าน ม.³/วัน</span>
+            <div class="p-3.5 sm:p-6 bg-slate-50/50">
+                
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+                    
+                    <!-- Left: Interactive Water Reservoir 3D Dam Cross-Section Graphic (7 cols) -->
+                    <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm flex flex-col justify-between relative overflow-hidden">
+                        <div class="flex items-center justify-between mb-3 z-10">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-3 h-3 rounded-full bg-sky-500 animate-ping"></span>
+                                <h3 class="text-xs sm:text-sm font-bold text-slate-800">ผังจำลองระดับน้ำในอ่างเก็บน้ำ (Dam Cross-Section View)</h3>
+                            </div>
+                            <span class="text-[11px] font-bold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-md border border-sky-100">
+                                ระดับน้ำคิดเป็น <span id="graphicDamPercentText" class="text-sky-900 font-extrabold text-xs sm:text-sm">45.49%</span>
+                            </span>
                         </div>
-                        <div class="text-[11px] text-slate-400 mt-1">ปริมาตรไหลสะสมเติมเข้าอ่าง</div>
+
+                        <!-- Dynamic Visual Dam Container -->
+                        <div class="relative w-full h-56 sm:h-64 bg-gradient-to-b from-sky-100 via-blue-50 to-slate-200 rounded-xl overflow-hidden border border-slate-300 shadow-inner flex flex-col justify-between">
+                            
+                            <!-- Dam Sky / Clouds Layer -->
+                            <div class="absolute top-2 left-3 right-3 flex justify-between items-center text-[10px] text-slate-500 font-semibold z-20 pointer-events-none">
+                                <span class="bg-white/80 backdrop-blur-xs px-2 py-0.5 rounded shadow-xs"><i class="fa-solid fa-mountain mr-1 text-slate-600"></i> สันเขื่อน (+314M m³)</span>
+                                <span class="bg-amber-100/90 text-amber-900 px-2 py-0.5 rounded shadow-xs"><i class="fa-solid fa-triangle-exclamation mr-1"></i> เกณฑ์เฝ้าระวัง 80%</span>
+                            </div>
+
+                            <!-- Dam Structure SVG Side Outline -->
+                            <div class="absolute right-0 bottom-0 top-0 w-24 sm:w-32 bg-slate-700/80 backdrop-blur-xs border-l-4 border-slate-800 z-10 flex flex-col justify-between p-2 text-white/80 text-[10px]">
+                                <div class="text-center font-bold border-b border-slate-600 pb-1 text-slate-200">
+                                    <i class="fa-solid fa-monument block text-sm mb-0.5"></i>โครงสร้างตัวเขื่อน
+                                </div>
+                                <div class="space-y-1 my-auto text-[9px] text-slate-300">
+                                    <div class="flex justify-between"><span>ทางระบาย:</span><span id="graphicDamOutflow" class="text-amber-300 font-bold">0.12</span></div>
+                                    <div class="text-[8px] text-slate-400">ล้าน ม.³/วัน</div>
+                                </div>
+                                <div class="text-[9px] text-center bg-slate-900/60 py-1 rounded border border-slate-600">
+                                    สปิลเวย์ (Spillway)
+                                </div>
+                            </div>
+
+                            <!-- Animated Liquid Water Wave Layer -->
+                            <div class="wave-box absolute inset-0 w-full h-full">
+                                <div id="waterWave1" class="wave"></div>
+                                <div id="waterWave2" class="wave"></div>
+                            </div>
+
+                            <!-- Water Surface Indicator Badge -->
+                            <div id="waterLevelBadge" class="absolute left-4 z-20 transition-all duration-700 flex items-center space-x-2" style="bottom: 40%;">
+                                <div class="bg-slate-900/90 text-sky-300 text-[11px] font-extrabold px-3 py-1 rounded-lg shadow-lg border border-sky-400/40 flex items-center space-x-1.5">
+                                    <i class="fa-solid fa-water text-xs animate-bounce"></i>
+                                    <span>ปริมาตรปัจจุบัน: <span id="graphicDamVolumeText" class="text-white text-xs sm:text-sm">142.85</span> ล้าน ม.³</span>
+                                </div>
+                            </div>
+
+                            <!-- Inflow Arrow Indicator -->
+                            <div class="absolute top-8 left-3 z-20 bg-white/90 backdrop-blur-xs p-2 rounded-lg border border-slate-200 shadow-sm flex items-center space-x-2">
+                                <div class="p-1.5 bg-emerald-100 text-emerald-700 rounded-md">
+                                    <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
+                                </div>
+                                <div>
+                                    <div class="text-[9px] text-slate-400 font-bold uppercase">น้ำไหลเข้าอ่าง (Inflow)</div>
+                                    <div class="text-xs font-black text-emerald-700"><span id="graphicDamInflow">0.42</span> <span class="text-[9px] font-normal text-slate-600">ล้าน ม.³/วัน</span></div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Legend & Capacity Meter -->
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-600 gap-2">
+                            <div class="flex items-center space-x-4">
+                                <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-sky-500 mr-1.5"></span>น้ำในอ่าง</span>
+                                <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-slate-300 mr-1.5"></span>ความจุว่างรองรับได้อีก (<span id="graphicDamRemaining">171.15</span>M m³)</span>
+                            </div>
+                            <span class="text-[11px] font-semibold text-slate-400">ความจุออกแบบ: 314.00 ล้าน ม.³</span>
+                        </div>
                     </div>
 
-                    <div class="bg-blue-50/60 p-3.5 sm:p-4 rounded-xl border border-blue-100">
-                        <div class="text-xs text-blue-700 font-medium">ปริมาตรน้ำปัจจุบัน</div>
-                        <div class="text-xl sm:text-2xl font-bold text-korat-blue mt-2">
-                            <span id="damVolume">142.85</span> <span class="text-xs font-normal text-slate-600">ล้าน ม.³</span>
+                    <!-- Right: Circular Hydro Gauge & Metrics Grid (5 cols) -->
+                    <div class="lg:col-span-5 flex flex-col justify-between space-y-3.5 sm:space-y-4">
+                        
+                        <!-- Circular Hydro Donut Chart Card -->
+                        <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm flex items-center justify-between relative">
+                            <div class="space-y-1">
+                                <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block">สัดส่วนความจุอ่างฯ</span>
+                                <div class="text-2xl sm:text-3xl font-black text-slate-800">
+                                    <span id="gaugePercentText">45.49</span><span class="text-base font-bold text-sky-600">%</span>
+                                </div>
+                                <span id="gaugeStatusText" class="inline-block text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                                    ระดับน้ำปานกลาง (ปกติ)
+                                </span>
+                            </div>
+
+                            <!-- Circular Doughnut Canvas -->
+                            <div class="relative w-28 h-28 sm:w-32 sm:h-32 shrink-0">
+                                <canvas id="reservoirGaugeChart"></canvas>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                    <i class="fa-solid fa-faucet-drip text-sky-500 text-base mb-0.5"></i>
+                                    <span class="text-[9px] font-bold text-slate-400 uppercase">Capacity</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="text-[11px] text-slate-500 mt-1">ความจุเก็บกักสูงสุด 314 ล้าน ม.³</div>
+
+                        <!-- 4 Essential Metrics Cards Grid -->
+                        <div class="grid grid-cols-2 gap-2.5 sm:gap-3 flex-grow">
+                            
+                            <!-- Metric 1: Inflow -->
+                            <div class="bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] sm:text-xs text-slate-500 font-medium">น้ำไหลเข้าอ่าง</span>
+                                    <div class="p-1.5 bg-emerald-100 text-emerald-700 rounded-md text-xs">
+                                        <i class="fa-solid fa-arrow-down-long"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <div class="text-base sm:text-lg font-black text-slate-800"><span id="metricInflow">0.42</span></div>
+                                    <div class="text-[10px] text-slate-400">ล้าน ม.³/วัน</div>
+                                </div>
+                            </div>
+
+                            <!-- Metric 2: Current Volume -->
+                            <div class="bg-gradient-to-br from-sky-500 to-korat-blue text-white p-3 sm:p-3.5 rounded-xl shadow-xs flex flex-col justify-between">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] sm:text-xs text-blue-100 font-medium">ปริมาตรน้ำปัจจุบัน</span>
+                                    <div class="p-1.5 bg-white/20 text-white rounded-md text-xs">
+                                        <i class="fa-solid fa-database"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <div class="text-base sm:text-lg font-black"><span id="metricVolume">142.85</span></div>
+                                    <div class="text-[10px] text-blue-200">ล้าน ม.³</div>
+                                </div>
+                            </div>
+
+                            <!-- Metric 3: Capacity Percent -->
+                            <div class="bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] sm:text-xs text-slate-500 font-medium">ร้อยละเทียบความจุ</span>
+                                    <div class="p-1.5 bg-sky-100 text-sky-700 rounded-md text-xs">
+                                        <i class="fa-solid fa-percent"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <div class="text-base sm:text-lg font-black text-sky-700"><span id="metricPercent">45.49</span>%</div>
+                                    <div class="text-[10px] text-slate-400">สูงสุด 314.00M m³</div>
+                                </div>
+                            </div>
+
+                            <!-- Metric 4: Outflow -->
+                            <div class="bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] sm:text-xs text-slate-500 font-medium">อัตราการระบายน้ำ</span>
+                                    <div class="p-1.5 bg-amber-100 text-amber-700 rounded-md text-xs">
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <div class="text-base sm:text-lg font-black text-amber-600"><span id="metricOutflow">0.12</span></div>
+                                    <div class="text-[10px] text-slate-400">ล้าน ม.³/วัน</div>
+                                </div>
+                            </div>
+
+                        </div>
+
                     </div>
 
-                    <div class="bg-slate-50 p-3.5 sm:p-4 rounded-xl border border-slate-200">
-                        <div class="text-xs text-slate-500 font-medium">ร้อยละเทียบความจุ (%)</div>
-                        <div class="text-xl sm:text-2xl font-bold text-emerald-600 mt-2">
-                            <span id="damPercent">45.49</span><span class="text-base sm:text-lg">%</span>
-                        </div>
-                        <div class="w-full bg-slate-200 rounded-full h-1.5 mt-2">
-                            <div id="damProgressBar" class="bg-emerald-500 h-1.5 rounded-full" style="width: 45.49%"></div>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-50 p-3.5 sm:p-4 rounded-xl border border-slate-200">
-                        <div class="text-xs text-slate-500 font-medium">อัตราการระบายน้ำ</div>
-                        <div class="text-xl sm:text-2xl font-bold text-amber-600 mt-2">
-                            <span id="damOutflow">0.12</span> <span class="text-xs font-normal text-slate-600">ล้าน ม.³/วัน</span>
-                        </div>
-                        <div class="text-[11px] text-slate-400 mt-1">การระบายน้ำลงสู่ลำน้ำธรรมชาติ</div>
-                    </div>
                 </div>
+
             </div>
         </section>
 
@@ -481,10 +675,12 @@
 
         let isLoggedIn = false;
         let chartInstance = null;
+        let reservoirGaugeChart = null;
 
         window.onload = function() {
             renderData();
             initChart();
+            initReservoirGaugeChart();
             fetchWeatherForecast();
             updateTimestamp();
         };
@@ -639,27 +835,34 @@
         }
 
         function renderData() {
+            // Rain Station Data Rendering
             document.getElementById('rain24h').innerText = appData.rain24h.toFixed(1);
             const rainStatusEl = document.getElementById('rainStatus');
             const rainRiskEl = document.getElementById('rainRiskEval');
 
             if (appData.rain24h === 0) {
                 rainStatusEl.innerText = 'ไม่มีฝนตก';
-                rainStatusEl.className = 'inline-block mt-1 text-[11px] sm:text-xs px-2 py-0.5 rounded font-medium bg-slate-100 text-slate-700';
-                rainRiskEl.innerText = 'สภาวะฝนสะสมอยู่ในเกณฑ์ปกติ';
-                rainRiskEl.className = 'text-xs sm:text-sm md:text-base font-semibold text-emerald-600 mt-0.5 block';
+                rainStatusEl.className = 'inline-block text-[10px] sm:text-xs px-2.5 py-1 rounded-lg font-semibold bg-slate-100 text-slate-700 border border-slate-200/60 shadow-xs';
+                rainRiskEl.innerText = 'สภาวะฝนสะสมอยู่ในเกณฑ์ปกติ ปลอดภัยต่อเสี่ยงน้ำท่วมฉับพลัน';
+                rainRiskEl.className = 'text-xs sm:text-sm md:text-base font-bold text-emerald-600 mt-0.5 block';
             } else if (appData.rain24h < 35.0) {
                 rainStatusEl.innerText = 'ฝนตกเล็กน้อย';
-                rainStatusEl.className = 'inline-block mt-1 text-[11px] sm:text-xs px-2 py-0.5 rounded font-medium bg-blue-100 text-blue-700';
-                rainRiskEl.innerText = 'ปริมาณฝนอยู่ในระดับปลอดภัย';
-                rainRiskEl.className = 'text-xs sm:text-sm md:text-base font-semibold text-emerald-600 mt-0.5 block';
+                rainStatusEl.className = 'inline-block text-[10px] sm:text-xs px-2.5 py-1 rounded-lg font-semibold bg-blue-100 text-blue-700 border border-blue-200/60 shadow-xs';
+                rainRiskEl.innerText = 'ปริมาณฝนอยู่ในระดับปลอดภัยต่อทางระบายน้ำ';
+                rainRiskEl.className = 'text-xs sm:text-sm md:text-base font-bold text-emerald-600 mt-0.5 block';
+            } else if (appData.rain24h < 90.0) {
+                rainStatusEl.innerText = 'ฝนตกปานกลาง';
+                rainStatusEl.className = 'inline-block text-[10px] sm:text-xs px-2.5 py-1 rounded-lg font-semibold bg-amber-100 text-amber-800 border border-amber-200/60 shadow-xs';
+                rainRiskEl.innerText = 'ควรเฝ้าระวังฝนสะสมหนาแน่นในพื้นที่ลุ่มต่ำ';
+                rainRiskEl.className = 'text-xs sm:text-sm md:text-base font-bold text-amber-600 mt-0.5 block';
             } else {
-                rainStatusEl.innerText = 'ฝนตกหนัก';
-                rainStatusEl.className = 'inline-block mt-1 text-[11px] sm:text-xs px-2 py-0.5 rounded font-medium bg-amber-100 text-amber-800';
-                rainRiskEl.innerText = 'ควรเฝ้าระวังฝนสะสมหนาแน่น';
-                rainRiskEl.className = 'text-xs sm:text-sm md:text-base font-semibold text-amber-600 mt-0.5 block';
+                rainStatusEl.innerText = 'ฝนตกหนักมาก';
+                rainStatusEl.className = 'inline-block text-[10px] sm:text-xs px-2.5 py-1 rounded-lg font-semibold bg-red-100 text-red-800 border border-red-200/60 shadow-xs';
+                rainRiskEl.innerText = 'แจ้งเตือนฝนตกหนัก มีความเสี่ยงน้ำท่วมขังเร่งระบาย!';
+                rainRiskEl.className = 'text-xs sm:text-sm md:text-base font-bold text-red-600 mt-0.5 block';
             }
 
+            // Stations Data Table
             const tbody = document.getElementById('stationsTableBody');
             tbody.innerHTML = '';
             appData.stations.forEach(st => {
@@ -686,17 +889,48 @@
                 tbody.appendChild(tr);
             });
 
-            document.getElementById('damInflow').innerText = appData.dam.inflow.toFixed(2);
-            document.getElementById('damVolume').innerText = appData.dam.volume.toFixed(2);
-            document.getElementById('damOutflow').innerText = appData.dam.outflow.toFixed(2);
-            
+            // Reservoir Data Update (Metrics & Infographic Dynamic Water Level)
             const percent = (appData.dam.volume / appData.dam.maxCapacity) * 100;
-            document.getElementById('damPercent').innerText = percent.toFixed(2);
-            document.getElementById('damProgressBar').style.width = `${Math.min(percent, 100)}%`;
+            const remainingVol = Math.max(0, appData.dam.maxCapacity - appData.dam.volume);
+
+            document.getElementById('metricInflow').innerText = appData.dam.inflow.toFixed(2);
+            document.getElementById('metricVolume').innerText = appData.dam.volume.toFixed(2);
+            document.getElementById('metricPercent').innerText = percent.toFixed(2);
+            document.getElementById('metricOutflow').innerText = appData.dam.outflow.toFixed(2);
+
+            document.getElementById('graphicDamInflow').innerText = appData.dam.inflow.toFixed(2);
+            document.getElementById('graphicDamOutflow').innerText = appData.dam.outflow.toFixed(2);
+            document.getElementById('graphicDamVolumeText').innerText = appData.dam.volume.toFixed(2);
+            document.getElementById('graphicDamPercentText').innerText = `${percent.toFixed(2)}%`;
+            document.getElementById('graphicDamRemaining').innerText = remainingVol.toFixed(2);
+            
+            document.getElementById('gaugePercentText').innerText = percent.toFixed(2);
+
+            const gaugeStatusEl = document.getElementById('gaugeStatusText');
+            if (percent >= 80) {
+                gaugeStatusEl.className = 'inline-block text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded bg-red-100 text-red-800';
+                gaugeStatusEl.innerText = 'ระดับน้ำสูงมาก (เฝ้าระวัง)';
+            } else if (percent >= 50) {
+                gaugeStatusEl.className = 'inline-block text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded bg-sky-100 text-sky-800';
+                gaugeStatusEl.innerText = 'ระดับน้ำปานกลาง (เกณฑ์ดี)';
+            } else {
+                gaugeStatusEl.className = 'inline-block text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800';
+                gaugeStatusEl.innerText = 'ระดับน้ำค่อนข้างน้อย';
+            }
+
+            // Animate Waves Height according to reservoir percentage (Range: bottom -95% to -10%)
+            const waveBottomPercent = -95 + (Math.min(percent, 100) * 0.85);
+            document.getElementById('waterWave1').style.bottom = `${waveBottomPercent}%`;
+            document.getElementById('waterWave2').style.bottom = `${waveBottomPercent - 3}%`;
+
+            // Adjust water badge bottom height visually
+            const badgeBottomPercent = Math.max(10, Math.min(percent * 0.75, 75));
+            document.getElementById('waterLevelBadge').style.bottom = `${badgeBottomPercent}%`;
 
             analyzeRiskConditions();
 
             if (chartInstance) updateChart();
+            if (reservoirGaugeChart) updateReservoirGaugeChart(percent);
         }
 
         async function fetchWeatherForecast() {
@@ -832,6 +1066,46 @@
                     }
                 }
             });
+        }
+
+        function initReservoirGaugeChart() {
+            const ctx = document.getElementById('reservoirGaugeChart').getContext('2d');
+            const percent = (appData.dam.volume / appData.dam.maxCapacity) * 100;
+            
+            reservoirGaugeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['ปริมาตรน้ำในอ่าง', 'ความจุว่างที่รองรับได้'],
+                    datasets: [{
+                        data: [percent, Math.max(0, 100 - percent)],
+                        backgroundColor: ['#0284c7', '#e2e8f0'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '76%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    return `${ctx.label}: ${ctx.raw.toFixed(2)}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateReservoirGaugeChart(percent) {
+            if (!reservoirGaugeChart) return;
+            reservoirGaugeChart.data.datasets[0].data = [percent, Math.max(0, 100 - percent)];
+            reservoirGaugeChart.data.datasets[0].backgroundColor[0] = percent >= 80 ? '#ef4444' : percent >= 50 ? '#0284c7' : '#f59e0b';
+            reservoirGaugeChart.update();
         }
 
         function updateChart() {
